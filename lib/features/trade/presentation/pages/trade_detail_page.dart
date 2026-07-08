@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../domain/entities/trade.dart';
 import '../../domain/usecases/trade_usecases.dart';
@@ -40,7 +41,9 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
   @override
   Widget build(BuildContext context) {
     if (_trade == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator(color: AppColors.accent)));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: AppColors.accent)),
+      );
     }
     final trade = _trade!;
 
@@ -48,10 +51,7 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
       appBar: AppBar(
         title: const Text(AppStrings.tradeDetail),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => context.push('/trades/${trade.id}/edit'),
-          ),
+          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => context.push('/trades/${trade.id}/edit')),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () async {
@@ -79,22 +79,28 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
         children: [
           Text('${trade.instrumentLabel} · ${trade.direction.label}', style: AppTextStyles.headlineLarge),
           const SizedBox(height: AppDimens.spacingSm),
-          Text(trade.outcome.label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.accent)),
+          Text(
+            trade.outcome.label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: trade.outcome == TradeOutcome.loss
+                  ? AppColors.loss
+                  : trade.outcome == TradeOutcome.win
+                  ? AppColors.profit
+                  : trade.outcome == TradeOutcome.breakeven
+                  ? AppColors.breakeven
+                  : AppColors.open,
+            ),
+          ),
           const SizedBox(height: AppDimens.spacingXl),
           _DetailRow(label: AppStrings.entryPrice, value: NumberFormatter.format(trade.entryPrice)),
-          if (trade.exitPrice != null)
-            _DetailRow(label: AppStrings.exitPrice, value: NumberFormatter.format(trade.exitPrice)),
+          if (trade.exitPrice != null) _DetailRow(label: AppStrings.exitPrice, value: NumberFormatter.format(trade.exitPrice)),
           _DetailRow(label: AppStrings.stopLoss, value: NumberFormatter.format(trade.stopLoss)),
-          if (trade.takeProfit != null)
-            _DetailRow(label: AppStrings.takeProfit, value: NumberFormatter.format(trade.takeProfit)),
+          if (trade.takeProfit != null) _DetailRow(label: AppStrings.takeProfit, value: NumberFormatter.format(trade.takeProfit)),
           _DetailRow(label: AppStrings.lotSize, value: NumberFormatter.format(trade.lotSize)),
           _DetailRow(label: AppStrings.entryDate, value: DateFormatter.formatDateTime(trade.entryDateTime)),
-          if (trade.exitDateTime != null)
-            _DetailRow(label: AppStrings.exitDate, value: DateFormatter.formatDateTime(trade.exitDateTime!)),
-          if (trade.pnl != null)
-            _DetailRow(label: AppStrings.pnl, value: CurrencyFormatter.format(trade.pnl!)),
-          if (trade.pnlPips != null)
-            _DetailRow(label: AppStrings.pnlPips, value: NumberFormatter.format(trade.pnlPips)),
+          if (trade.exitDateTime != null) _DetailRow(label: AppStrings.exitDate, value: DateFormatter.formatDateTime(trade.exitDateTime!)),
+          if (trade.pnl != null) _DetailRow(label: AppStrings.pnl, value: CurrencyFormatter.format(trade.pnl!)),
+          if (trade.pnlPips != null) _DetailRow(label: AppStrings.pnlPips, value: NumberFormatter.format(trade.pnlPips)),
           if (trade.riskRewardPlanned != null)
             _DetailRow(label: AppStrings.plannedRR, value: CurrencyFormatter.formatRatio(trade.riskRewardPlanned)),
           if (trade.riskRewardActual != null)
@@ -113,11 +119,7 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
             ),
           ],
           const SizedBox(height: AppDimens.spacingXl),
-          if (trade.isOpen)
-            AppButton(
-              label: AppStrings.closeTrade,
-              onPressed: () => context.push('/trades/${trade.id}/edit'),
-            ),
+          if (trade.isOpen) AppButton(label: AppStrings.closeTrade, onPressed: () => context.push('/trades/${trade.id}/edit')),
         ],
       ),
     );

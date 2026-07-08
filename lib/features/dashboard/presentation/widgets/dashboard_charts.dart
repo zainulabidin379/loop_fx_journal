@@ -4,6 +4,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../domain/entities/dashboard_entities.dart';
 
 class EquityChart extends StatelessWidget {
@@ -27,6 +28,21 @@ class EquityChart extends StatelessWidget {
           gridData: const FlGridData(show: false),
           titlesData: const FlTitlesData(show: false),
           borderData: FlBorderData(show: false),
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipItems: (touchedSpots) {
+                return touchedSpots.map((spot) {
+                  return LineTooltipItem(
+                    NumberFormatter.format(spot.y),
+                    AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                }).toList();
+              },
+            ),
+          ),
           lineBarsData: [
             LineChartBarData(
               spots: [
@@ -138,6 +154,20 @@ class BreakdownBarChart extends StatelessWidget {
                 rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               ),
               borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final color = rod.toY >= 0 ? AppColors.profit : AppColors.loss;
+                    return BarTooltipItem(
+                      NumberFormatter.format(rod.toY),
+                      AppTextStyles.bodyMedium.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ),
               barGroups: [
                 for (var i = 0; i < data.length; i++)
                   BarChartGroupData(
