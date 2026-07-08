@@ -9,6 +9,7 @@ import '../../../strategy/domain/entities/strategy.dart';
 import '../../../strategy/domain/usecases/strategy_usecases.dart';
 import '../../domain/entities/trade.dart';
 import '../../domain/usecases/trade_usecases.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../domain/utils/trade_calculator.dart';
 
 part 'trade_form_event.dart';
@@ -49,11 +50,11 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         instrument: existing?.instrument ?? TradeInstrument.xauusd,
         customInstrument: existing?.customInstrument,
         direction: existing?.direction ?? TradeDirection.long,
-        entryPrice: existing?.entryPrice.toString() ?? '',
-        exitPrice: existing?.exitPrice?.toString() ?? '',
-        stopLoss: existing?.stopLoss.toString() ?? '',
-        takeProfit: existing?.takeProfit?.toString() ?? '',
-        lotSize: existing?.lotSize.toString() ?? '',
+        entryPrice: NumberFormatter.formatInput(existing?.entryPrice),
+        exitPrice: NumberFormatter.formatInput(existing?.exitPrice),
+        stopLoss: NumberFormatter.formatInput(existing?.stopLoss),
+        takeProfit: NumberFormatter.formatInput(existing?.takeProfit),
+        lotSize: NumberFormatter.formatInput(existing?.lotSize),
         entryDateTime: existing?.entryDateTime ?? DateTime.now(),
         exitDateTime: existing?.exitDateTime,
         strategyId: existing?.strategyId,
@@ -90,6 +91,9 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         ClosePriceSource.stopLoss => nextStopLoss,
         ClosePriceSource.custom => nextExitPrice,
       };
+      if (nextExitPrice.isNotEmpty) {
+        nextExitPrice = NumberFormatter.formatString(nextExitPrice);
+      }
     }
 
     final next = state.copyWith(
@@ -129,11 +133,11 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
 
   Future<void> _onSave(TradeFormSaveRequested event, Emitter<TradeFormState> emit) async {
     emit(state.copyWith(status: TradeFormStatus.saving));
-    final entry = double.parse(state.entryPrice);
-    final sl = double.parse(state.stopLoss);
-    final lot = double.parse(state.lotSize);
-    final tp = double.tryParse(state.takeProfit);
-    final exit = double.tryParse(state.exitPrice);
+    final entry = NumberFormatter.round(double.parse(state.entryPrice));
+    final sl = NumberFormatter.round(double.parse(state.stopLoss));
+    final lot = NumberFormatter.round(double.parse(state.lotSize));
+    final tp = state.takeProfit.isEmpty ? null : NumberFormatter.round(double.parse(state.takeProfit));
+    final exit = state.exitPrice.isEmpty ? null : NumberFormatter.round(double.parse(state.exitPrice));
 
     double? pnl;
     double? pnlPips;
@@ -147,8 +151,11 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         entryPrice: entry,
         exitPrice: exit,
       );
-      pnl = (pnlPips ?? 0) * 10 * lot;
-      actualRR = TradeCalculator.actualRiskReward(direction: state.direction, entryPrice: entry, stopLoss: sl, exitPrice: exit);
+      pnl = NumberFormatter.roundNullable((pnlPips ?? 0) * 10 * lot);
+      actualRR = NumberFormatter.roundNullable(
+        TradeCalculator.actualRiskReward(direction: state.direction, entryPrice: entry, stopLoss: sl, exitPrice: exit),
+      );
+      pnlPips = NumberFormatter.roundNullable(pnlPips);
       outcome = TradeCalculator.outcomeFromPnl(pnl);
     }
 
@@ -167,7 +174,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       outcome: state.isClosed ? outcome : TradeOutcome.open,
       pnl: pnl,
       pnlPips: pnlPips,
-      riskRewardPlanned: state.plannedRR,
+      riskRewardPlanned: NumberFormatter.roundNullable(state.plannedRR),
       riskRewardActual: actualRR,
       strategyId: state.strategyId,
       notes: state.notes.isEmpty ? null : state.notes,

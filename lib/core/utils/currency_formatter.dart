@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import 'number_formatter.dart';
+
 abstract final class CurrencyFormatter {
   static String format(double value, {String currency = 'USD'}) {
     final symbol = _symbolFor(currency);
@@ -7,18 +9,13 @@ abstract final class CurrencyFormatter {
     return formatter.format(value);
   }
 
-  static String formatSigned(double value, {String currency = 'USD'}) {
-    final prefix = value >= 0 ? '+' : '';
-    return '$prefix${format(value, currency: currency)}';
-  }
-
   static String formatPercent(double value) {
-    return '${value.toStringAsFixed(1)}%';
+    return '${NumberFormatter.format(value)}%';
   }
 
   static String formatRatio(double? value) {
     if (value == null) return '—';
-    return '${value.toStringAsFixed(2)}R';
+    return '${NumberFormatter.format(value)}R';
   }
 
   static String _symbolFor(String currency) {

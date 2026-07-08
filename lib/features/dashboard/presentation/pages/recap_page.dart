@@ -69,7 +69,7 @@ class _RecapCard extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.spacingSm),
             Text(
-              CurrencyFormatter.formatSigned(summary.totalPnl),
+              CurrencyFormatter.format(summary.totalPnl),
               style: AppTextStyles.metricValue.copyWith(
                 color: summary.totalPnl >= 0 ? AppColors.profit : AppColors.loss,
               ),

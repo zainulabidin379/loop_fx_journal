@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_text_styles.dart';
+import '../utils/number_formatter.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField({
@@ -14,6 +16,8 @@ class AppTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.suffixIcon,
+    this.isDecimal = false,
+    this.inputFormatters,
   });
 
   final String label;
@@ -26,6 +30,8 @@ class AppTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final Widget? suffixIcon;
+  final bool isDecimal;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +42,12 @@ class AppTextField extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          keyboardType: keyboardType,
+          keyboardType: isDecimal
+              ? const TextInputType.numberWithOptions(decimal: true)
+              : keyboardType,
+          inputFormatters: isDecimal
+              ? [const DecimalTextInputFormatter(), ...?inputFormatters]
+              : inputFormatters,
           maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,

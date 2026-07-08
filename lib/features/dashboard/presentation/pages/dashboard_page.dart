@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/number_formatter.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/filter_chip_bar.dart';
 import '../../../../core/widgets/metric_card.dart';
-import '../../../../core/widgets/app_card.dart';
-import '../../domain/entities/dashboard_entities.dart';
 import '../../../trade/domain/entities/trade.dart';
+import '../../domain/entities/dashboard_entities.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../widgets/dashboard_charts.dart';
 
@@ -54,17 +56,9 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.dashboardTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.summarize_outlined),
-            onPressed: () => context.push('/recap'),
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.summarize_outlined), onPressed: () => context.push('/recap'))],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/trades/add'),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: FloatingActionButton(onPressed: () => context.push('/trades/add'), child: const Icon(Icons.add)),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state.status == DashboardStatus.loading) {
@@ -88,16 +82,9 @@ class _DashboardPageState extends State<DashboardPage> {
               padding: const EdgeInsets.all(AppDimens.spacingLg),
               children: [
                 FilterChipBar(
-                  options: const [
-                    AppStrings.filter7d,
-                    AppStrings.filter30d,
-                    AppStrings.filter90d,
-                    AppStrings.filterAll,
-                  ],
+                  options: const [AppStrings.filter7d, AppStrings.filter30d, AppStrings.filter90d, AppStrings.filterAll],
                   selected: _dateFilterLabel(state.filter.dateRange),
-                  onSelected: (label) => context.read<DashboardBloc>().add(
-                        DashboardFilterChanged(dateRange: _filterFromLabel(label)),
-                      ),
+                  onSelected: (label) => context.read<DashboardBloc>().add(DashboardFilterChanged(dateRange: _filterFromLabel(label))),
                 ),
                 const SizedBox(height: AppDimens.spacingLg),
                 GridView.count(
@@ -110,21 +97,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     MetricCard(
                       label: AppStrings.totalPnl,
-                      value: CurrencyFormatter.formatSigned(state.metrics.totalPnl),
+                      value: CurrencyFormatter.format(state.metrics.totalPnl),
                       valueColor: state.metrics.totalPnl >= 0 ? AppColors.profit : AppColors.loss,
                     ),
-                    MetricCard(
-                      label: AppStrings.winRate,
-                      value: CurrencyFormatter.formatPercent(state.metrics.winRate),
-                    ),
-                    MetricCard(
-                      label: AppStrings.totalTrades,
-                      value: '${state.metrics.totalTrades}',
-                    ),
-                    MetricCard(
-                      label: AppStrings.avgRiskReward,
-                      value: CurrencyFormatter.formatRatio(state.metrics.avgRiskReward),
-                    ),
+                    MetricCard(label: AppStrings.winRate, value: CurrencyFormatter.formatPercent(state.metrics.winRate)),
+                    MetricCard(label: AppStrings.totalTrades, value: '${state.metrics.totalTrades}'),
+                    MetricCard(label: AppStrings.avgRiskReward, value: CurrencyFormatter.formatRatio(state.metrics.avgRiskReward)),
                   ],
                 ),
                 const SizedBox(height: AppDimens.spacingLg),
@@ -150,11 +128,17 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 const SizedBox(height: AppDimens.spacingLg),
-                AppCard(child: BreakdownBarChart(data: state.byInstrument, title: AppStrings.performanceByInstrument)),
+                AppCard(
+                  child: BreakdownBarChart(data: state.byInstrument, title: AppStrings.performanceByInstrument),
+                ),
                 const SizedBox(height: AppDimens.spacingLg),
-                AppCard(child: BreakdownBarChart(data: state.byStrategy, title: AppStrings.performanceByStrategy)),
+                AppCard(
+                  child: BreakdownBarChart(data: state.byStrategy, title: AppStrings.performanceByStrategy),
+                ),
                 const SizedBox(height: AppDimens.spacingLg),
-                AppCard(child: BreakdownBarChart(data: state.byEmotion, title: AppStrings.performanceByEmotion)),
+                AppCard(
+                  child: BreakdownBarChart(data: state.byEmotion, title: AppStrings.performanceByEmotion),
+                ),
                 const SizedBox(height: AppDimens.spacingLg),
                 _StreakCard(streak: state.streak),
                 if (state.openTrades.isNotEmpty) ...[
@@ -166,11 +150,14 @@ class _DashboardPageState extends State<DashboardPage> {
                   Row(
                     children: [
                       if (state.bestTrade != null)
-                        Expanded(child: _HighlightCard(title: AppStrings.bestTrade, highlight: state.bestTrade!)),
-                      if (state.bestTrade != null && state.worstTrade != null)
-                        const SizedBox(width: AppDimens.spacingMd),
+                        Expanded(
+                          child: _HighlightCard(title: AppStrings.bestTrade, highlight: state.bestTrade!),
+                        ),
+                      if (state.bestTrade != null && state.worstTrade != null) const SizedBox(width: AppDimens.spacingMd),
                       if (state.worstTrade != null)
-                        Expanded(child: _HighlightCard(title: AppStrings.worstTrade, highlight: state.worstTrade!)),
+                        Expanded(
+                          child: _HighlightCard(title: AppStrings.worstTrade, highlight: state.worstTrade!),
+                        ),
                     ],
                   ),
                 ],
@@ -198,15 +185,10 @@ class _StreakCard extends StatelessWidget {
           const SizedBox(height: AppDimens.spacingMd),
           Text(
             '${streak.currentStreak} ${streak.isWinStreak ? AppStrings.wins : AppStrings.losses}',
-            style: AppTextStyles.metricValue.copyWith(
-              color: streak.isWinStreak ? AppColors.profit : AppColors.loss,
-            ),
+            style: AppTextStyles.metricValue.copyWith(color: streak.isWinStreak ? AppColors.profit : AppColors.loss),
           ),
           const SizedBox(height: AppDimens.spacingSm),
-          Text(
-            'Best: ${streak.longestWinStreak}W / ${streak.longestLossStreak}L',
-            style: AppTextStyles.bodySmall,
-          ),
+          Text('Best: ${streak.longestWinStreak}W / ${streak.longestLossStreak}L', style: AppTextStyles.bodySmall),
         ],
       ),
     );
@@ -226,13 +208,15 @@ class _OpenTradesSection extends StatelessWidget {
         children: [
           Text(AppStrings.openTrades, style: AppTextStyles.titleMedium),
           const SizedBox(height: AppDimens.spacingMd),
-          ...trades.map((trade) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(trade.instrumentLabel, style: AppTextStyles.bodyMedium),
-                subtitle: Text('${trade.direction.label} · ${trade.entryPrice}', style: AppTextStyles.bodySmall),
-                trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
-                onTap: () => context.push('/trades/${trade.id}'),
-              )),
+          ...trades.map(
+            (trade) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(trade.instrumentLabel, style: AppTextStyles.bodyMedium),
+              subtitle: Text('${trade.direction.label} · ${NumberFormatter.format(trade.entryPrice)}', style: AppTextStyles.bodySmall),
+              trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+              onTap: () => context.push('/trades/${trade.id}'),
+            ),
+          ),
         ],
       ),
     );
@@ -256,11 +240,8 @@ class _HighlightCard extends StatelessWidget {
           const SizedBox(height: AppDimens.spacingSm),
           Text(highlight.trade.instrumentLabel, style: AppTextStyles.titleMedium),
           Text(
-            CurrencyFormatter.formatSigned(highlight.pnl),
-            style: AppTextStyles.metricValue.copyWith(
-              fontSize: 20,
-              color: highlight.pnl >= 0 ? AppColors.profit : AppColors.loss,
-            ),
+            CurrencyFormatter.format(highlight.pnl),
+            style: AppTextStyles.metricValue.copyWith(fontSize: 20, color: highlight.pnl >= 0 ? AppColors.profit : AppColors.loss),
           ),
         ],
       ),

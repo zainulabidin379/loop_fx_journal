@@ -7,6 +7,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../domain/entities/trade.dart';
@@ -80,16 +81,20 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
           const SizedBox(height: AppDimens.spacingSm),
           Text(trade.outcome.label, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.accent)),
           const SizedBox(height: AppDimens.spacingXl),
-          _DetailRow(label: AppStrings.entryPrice, value: '${trade.entryPrice}'),
-          if (trade.exitPrice != null) _DetailRow(label: AppStrings.exitPrice, value: '${trade.exitPrice}'),
-          _DetailRow(label: AppStrings.stopLoss, value: '${trade.stopLoss}'),
-          if (trade.takeProfit != null) _DetailRow(label: AppStrings.takeProfit, value: '${trade.takeProfit}'),
-          _DetailRow(label: AppStrings.lotSize, value: '${trade.lotSize}'),
+          _DetailRow(label: AppStrings.entryPrice, value: NumberFormatter.format(trade.entryPrice)),
+          if (trade.exitPrice != null)
+            _DetailRow(label: AppStrings.exitPrice, value: NumberFormatter.format(trade.exitPrice)),
+          _DetailRow(label: AppStrings.stopLoss, value: NumberFormatter.format(trade.stopLoss)),
+          if (trade.takeProfit != null)
+            _DetailRow(label: AppStrings.takeProfit, value: NumberFormatter.format(trade.takeProfit)),
+          _DetailRow(label: AppStrings.lotSize, value: NumberFormatter.format(trade.lotSize)),
           _DetailRow(label: AppStrings.entryDate, value: DateFormatter.formatDateTime(trade.entryDateTime)),
           if (trade.exitDateTime != null)
             _DetailRow(label: AppStrings.exitDate, value: DateFormatter.formatDateTime(trade.exitDateTime!)),
           if (trade.pnl != null)
-            _DetailRow(label: AppStrings.pnl, value: CurrencyFormatter.formatSigned(trade.pnl!)),
+            _DetailRow(label: AppStrings.pnl, value: CurrencyFormatter.format(trade.pnl!)),
+          if (trade.pnlPips != null)
+            _DetailRow(label: AppStrings.pnlPips, value: NumberFormatter.format(trade.pnlPips)),
           if (trade.riskRewardPlanned != null)
             _DetailRow(label: AppStrings.plannedRR, value: CurrencyFormatter.formatRatio(trade.riskRewardPlanned)),
           if (trade.riskRewardActual != null)

@@ -8,6 +8,7 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/di/injection_container.dart';
 import '../../../../core/services/notification_service.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/app_settings.dart';
 import '../cubit/settings_cubit.dart';
@@ -105,7 +106,12 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               ListTile(
                 title: Text(AppStrings.startingBalance, style: AppTextStyles.bodyLarge),
-                subtitle: Text(settings.startingBalance?.toString() ?? '—', style: AppTextStyles.bodySmall),
+                subtitle: Text(
+                  settings.startingBalance != null
+                      ? NumberFormatter.format(settings.startingBalance)
+                      : '—',
+                  style: AppTextStyles.bodySmall,
+                ),
                 onTap: () => _showNumberDialog(
                   title: AppStrings.startingBalance,
                   initial: settings.startingBalance,
@@ -114,7 +120,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               ListTile(
                 title: Text(AppStrings.defaultRiskPercent, style: AppTextStyles.bodyLarge),
-                subtitle: Text('${settings.defaultRiskPercent ?? 1.0}%', style: AppTextStyles.bodySmall),
+                subtitle: Text(
+                  '${NumberFormatter.format(settings.defaultRiskPercent ?? 1.0)}%',
+                  style: AppTextStyles.bodySmall,
+                ),
                 onTap: () => _showNumberDialog(
                   title: AppStrings.defaultRiskPercent,
                   initial: settings.defaultRiskPercent,
@@ -175,7 +184,9 @@ class _SettingsPageState extends State<SettingsPage> {
     required double? initial,
     required ValueChanged<double?> onSave,
   }) async {
-    final controller = TextEditingController(text: initial?.toString() ?? '');
+    final controller = TextEditingController(
+      text: initial != null ? NumberFormatter.formatInput(initial) : '',
+    );
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -183,6 +194,7 @@ class _SettingsPageState extends State<SettingsPage> {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: const [DecimalTextInputFormatter()],
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text(AppStrings.cancel)),
@@ -191,7 +203,8 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
     if (saved == true) {
-      onSave(double.tryParse(controller.text));
+      final parsed = double.tryParse(controller.text);
+      onSave(parsed != null ? NumberFormatter.round(parsed) : null);
     }
   }
 }

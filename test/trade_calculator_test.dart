@@ -1,9 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:loop_fx_journal/core/utils/currency_formatter.dart';
+import 'package:loop_fx_journal/core/utils/number_formatter.dart';
 import 'package:loop_fx_journal/features/trade/domain/entities/trade.dart';
 import 'package:loop_fx_journal/features/trade/domain/utils/trade_calculator.dart';
 import 'package:loop_fx_journal/features/dashboard/domain/utils/dashboard_analytics.dart';
 
 void main() {
+  group('NumberFormatter', () {
+    test('formats values to two decimals', () {
+      expect(NumberFormatter.format(1.234), '1.23');
+      expect(NumberFormatter.format(10), '10.00');
+    });
+
+    test('rounds values to two decimals', () {
+      expect(NumberFormatter.round(1.236), 1.24);
+    });
+  });
+
+  group('CurrencyFormatter', () {
+    test('formats percent to two decimals', () {
+      expect(CurrencyFormatter.formatPercent(58.456), '58.46%');
+    });
+  });
+
   group('TradeCalculator', () {
     test('calculates planned risk reward', () {
       final rr = TradeCalculator.plannedRiskReward(

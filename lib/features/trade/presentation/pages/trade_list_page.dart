@@ -85,7 +85,7 @@ class _TradeTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              trade.pnl != null ? CurrencyFormatter.formatSigned(trade.pnl!) : trade.outcome.label,
+              trade.pnl != null ? CurrencyFormatter.format(trade.pnl!) : trade.outcome.label,
               style: AppTextStyles.bodyMedium.copyWith(color: _outcomeColor()),
             ),
           ],

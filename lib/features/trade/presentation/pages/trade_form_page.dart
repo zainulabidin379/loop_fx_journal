@@ -6,6 +6,7 @@ import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -136,28 +137,28 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 AppTextField(
                   label: AppStrings.entryPrice,
                   controller: _entryController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isDecimal: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(entryPrice: v)),
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
                   label: AppStrings.stopLoss,
                   controller: _slController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isDecimal: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(stopLoss: v)),
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
                   label: AppStrings.takeProfit,
                   controller: _tpController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isDecimal: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(takeProfit: v)),
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
                   label: AppStrings.lotSize,
                   controller: _lotController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  isDecimal: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(lotSize: v)),
                 ),
                 if (state.plannedRR != null) ...[
@@ -168,7 +169,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 if (state.suggestedLot != null) ...[
                   const SizedBox(height: AppDimens.spacingSm),
                   Text(
-                    '${AppStrings.suggestedLotSize}: ${state.suggestedLot!.toStringAsFixed(2)}',
+                    '${AppStrings.suggestedLotSize}: ${NumberFormatter.format(state.suggestedLot)}',
                     style: AppTextStyles.bodySmall,
                   ),
                 ],
@@ -257,7 +258,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                     AppTextField(
                       label: AppStrings.exitPrice,
                       controller: _exitController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      isDecimal: true,
                       onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(exitPrice: v)),
                     )
                   else
