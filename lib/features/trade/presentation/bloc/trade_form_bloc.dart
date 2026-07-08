@@ -1,0 +1,190 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../../../core/usecases/usecase.dart';
+import '../../../settings/domain/entities/app_settings.dart';
+import '../../../settings/domain/usecases/settings_usecases.dart';
+import '../../../strategy/domain/entities/strategy.dart';
+import '../../../strategy/domain/usecases/strategy_usecases.dart';
+import '../../domain/entities/trade.dart';
+import '../../domain/usecases/trade_usecases.dart';
+import '../../domain/utils/trade_calculator.dart';
+
+part 'trade_form_event.dart';
+part 'trade_form_state.dart';
+
+class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
+  TradeFormBloc({
+    required this._addTrade,
+    required this._updateTrade,
+    required this._getTradeById,
+    required this._getActiveStrategies,
+    required this._getSettings,
+  }) : super(const TradeFormState()) {
+    on<TradeFormInit>(_onInit);
+    on<TradeFormFieldChanged>(_onFieldChanged);
+    on<TradeFormSaveRequested>(_onSave);
+  }
+
+  final AddTrade _addTrade;
+  final UpdateTrade _updateTrade;
+  final GetTradeById _getTradeById;
+  final GetActiveStrategies _getActiveStrategies;
+  final GetSettings _getSettings;
+  final _uuid = const Uuid();
+
+  Future<void> _onInit(TradeFormInit event, Emitter<TradeFormState> emit) async {
+    emit(state.copyWith(status: TradeFormStatus.loading));
+    final strategies = await _getActiveStrategies(const NoParams());
+    final settings = await _getSettings(const NoParams());
+    Trade? existing;
+    if (event.tradeId != null) {
+      existing = await _getTradeById(event.tradeId!);
+    }
+    emit(
+      state.copyWith(
+        status: TradeFormStatus.editing,
+        tradeId: existing?.id,
+        instrument: existing?.instrument ?? TradeInstrument.xauusd,
+        customInstrument: existing?.customInstrument,
+        direction: existing?.direction ?? TradeDirection.long,
+        entryPrice: existing?.entryPrice.toString() ?? '',
+        exitPrice: existing?.exitPrice?.toString() ?? '',
+        stopLoss: existing?.stopLoss.toString() ?? '',
+        takeProfit: existing?.takeProfit?.toString() ?? '',
+        lotSize: existing?.lotSize.toString() ?? '',
+        entryDateTime: existing?.entryDateTime ?? DateTime.now(),
+        exitDateTime: existing?.exitDateTime,
+        strategyId: existing?.strategyId,
+        notes: existing?.notes ?? '',
+        tags: existing?.tags ?? [],
+        screenshotPaths: existing?.screenshotPaths ?? [],
+        emotionBefore: existing?.emotionBefore,
+        emotionAfter: existing?.emotionAfter,
+        isClosed: existing != null && existing.outcome != TradeOutcome.open,
+        strategies: strategies,
+        settings: settings,
+        plannedRR: existing?.riskRewardPlanned,
+        suggestedLot: _computeSuggestedLot(
+          settings: settings,
+          entryPrice: existing?.entryPrice,
+          stopLoss: existing?.stopLoss,
+          instrument: existing?.instrument ?? TradeInstrument.xauusd,
+        ),
+      ),
+    );
+  }
+
+  void _onFieldChanged(TradeFormFieldChanged event, Emitter<TradeFormState> emit) {
+    final next = state.copyWith(
+      instrument: event.instrument ?? state.instrument,
+      customInstrument: event.customInstrument ?? state.customInstrument,
+      direction: event.direction ?? state.direction,
+      entryPrice: event.entryPrice ?? state.entryPrice,
+      exitPrice: event.exitPrice ?? state.exitPrice,
+      stopLoss: event.stopLoss ?? state.stopLoss,
+      takeProfit: event.takeProfit ?? state.takeProfit,
+      lotSize: event.lotSize ?? state.lotSize,
+      entryDateTime: event.entryDateTime ?? state.entryDateTime,
+      exitDateTime: event.exitDateTime ?? state.exitDateTime,
+      strategyId: event.strategyId ?? state.strategyId,
+      notes: event.notes ?? state.notes,
+      tags: event.tags ?? state.tags,
+      screenshotPaths: event.screenshotPaths ?? state.screenshotPaths,
+      emotionBefore: event.emotionBefore ?? state.emotionBefore,
+      emotionAfter: event.emotionAfter ?? state.emotionAfter,
+      isClosed: event.isClosed ?? state.isClosed,
+    );
+
+    final entry = double.tryParse(next.entryPrice);
+    final sl = double.tryParse(next.stopLoss);
+    final tp = double.tryParse(next.takeProfit);
+
+    emit(
+      next.copyWith(
+        plannedRR: entry != null && sl != null
+            ? TradeCalculator.plannedRiskReward(direction: next.direction, entryPrice: entry, stopLoss: sl, takeProfit: tp)
+            : null,
+        suggestedLot: _computeSuggestedLot(settings: next.settings, entryPrice: entry, stopLoss: sl, instrument: next.instrument),
+      ),
+    );
+  }
+
+  Future<void> _onSave(TradeFormSaveRequested event, Emitter<TradeFormState> emit) async {
+    emit(state.copyWith(status: TradeFormStatus.saving));
+    final entry = double.parse(state.entryPrice);
+    final sl = double.parse(state.stopLoss);
+    final lot = double.parse(state.lotSize);
+    final tp = double.tryParse(state.takeProfit);
+    final exit = double.tryParse(state.exitPrice);
+
+    double? pnl;
+    double? pnlPips;
+    double? actualRR;
+    TradeOutcome outcome = TradeOutcome.open;
+
+    if (state.isClosed && exit != null) {
+      pnlPips = TradeCalculator.calculatePnlPips(
+        instrument: state.instrument,
+        direction: state.direction,
+        entryPrice: entry,
+        exitPrice: exit,
+      );
+      pnl = (pnlPips ?? 0) * 10 * lot;
+      actualRR = TradeCalculator.actualRiskReward(direction: state.direction, entryPrice: entry, stopLoss: sl, exitPrice: exit);
+      outcome = TradeCalculator.outcomeFromPnl(pnl);
+    }
+
+    final trade = Trade(
+      id: state.tradeId ?? _uuid.v4(),
+      instrument: state.instrument,
+      customInstrument: state.customInstrument,
+      direction: state.direction,
+      entryPrice: entry,
+      exitPrice: exit,
+      stopLoss: sl,
+      takeProfit: tp,
+      lotSize: lot,
+      entryDateTime: state.entryDateTime ?? DateTime.now(),
+      exitDateTime: state.isClosed ? (state.exitDateTime ?? DateTime.now()) : null,
+      outcome: state.isClosed ? outcome : TradeOutcome.open,
+      pnl: pnl,
+      pnlPips: pnlPips,
+      riskRewardPlanned: state.plannedRR,
+      riskRewardActual: actualRR,
+      strategyId: state.strategyId,
+      notes: state.notes.isEmpty ? null : state.notes,
+      screenshotPaths: state.screenshotPaths.isEmpty ? null : state.screenshotPaths,
+      tags: state.tags.isEmpty ? null : state.tags,
+      emotionBefore: state.emotionBefore,
+      emotionAfter: state.emotionAfter,
+      accountBalanceAtEntry: state.settings?.startingBalance,
+    );
+
+    if (state.tradeId != null) {
+      await _updateTrade(trade);
+    } else {
+      await _addTrade(trade);
+    }
+    emit(state.copyWith(status: TradeFormStatus.saved));
+  }
+
+  double? _computeSuggestedLot({
+    required AppSettings? settings,
+    required double? entryPrice,
+    required double? stopLoss,
+    required TradeInstrument instrument,
+  }) {
+    if (settings?.startingBalance == null || settings?.defaultRiskPercent == null || entryPrice == null || stopLoss == null) {
+      return null;
+    }
+    return TradeCalculator.suggestedLotSize(
+      accountBalance: settings!.startingBalance!,
+      riskPercent: settings.defaultRiskPercent!,
+      entryPrice: entryPrice,
+      stopLoss: stopLoss,
+      instrument: instrument,
+    );
+  }
+}
