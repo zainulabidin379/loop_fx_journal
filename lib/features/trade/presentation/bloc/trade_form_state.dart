@@ -2,6 +2,8 @@ part of 'trade_form_bloc.dart';
 
 enum TradeFormStatus { initial, loading, editing, saving, saved, error }
 
+enum ClosePriceSource { takeProfit, stopLoss, custom }
+
 class TradeFormState extends Equatable {
   const TradeFormState({
     this.status = TradeFormStatus.initial,
@@ -23,6 +25,7 @@ class TradeFormState extends Equatable {
     this.emotionBefore,
     this.emotionAfter,
     this.isClosed = false,
+    this.closePriceSource = ClosePriceSource.custom,
     this.strategies = const [],
     this.settings,
     this.plannedRR,
@@ -48,6 +51,7 @@ class TradeFormState extends Equatable {
   final EmotionBefore? emotionBefore;
   final EmotionAfter? emotionAfter;
   final bool isClosed;
+  final ClosePriceSource closePriceSource;
   final List<Strategy> strategies;
   final AppSettings? settings;
   final double? plannedRR;
@@ -73,6 +77,7 @@ class TradeFormState extends Equatable {
     EmotionBefore? emotionBefore,
     EmotionAfter? emotionAfter,
     bool? isClosed,
+    ClosePriceSource? closePriceSource,
     List<Strategy>? strategies,
     AppSettings? settings,
     double? plannedRR,
@@ -98,6 +103,7 @@ class TradeFormState extends Equatable {
       emotionBefore: emotionBefore ?? this.emotionBefore,
       emotionAfter: emotionAfter ?? this.emotionAfter,
       isClosed: isClosed ?? this.isClosed,
+      closePriceSource: closePriceSource ?? this.closePriceSource,
       strategies: strategies ?? this.strategies,
       settings: settings ?? this.settings,
       plannedRR: plannedRR ?? this.plannedRR,
@@ -126,6 +132,7 @@ class TradeFormState extends Equatable {
         emotionBefore,
         emotionAfter,
         isClosed,
+        closePriceSource,
         strategies,
         settings,
         plannedRR,

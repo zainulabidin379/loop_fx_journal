@@ -230,12 +230,41 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(isClosed: v)),
                 ),
                 if (state.isClosed) ...[
-                  AppTextField(
-                    label: AppStrings.exitPrice,
-                    controller: _exitController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(exitPrice: v)),
+                  Text(AppStrings.closePrice, style: AppTextStyles.labelMedium),
+                  const SizedBox(height: AppDimens.spacingSm),
+                  SegmentedButton<ClosePriceSource>(
+                    segments: const [
+                      ButtonSegment(
+                        value: ClosePriceSource.takeProfit,
+                        label: Text(AppStrings.closeAtTakeProfit),
+                      ),
+                      ButtonSegment(
+                        value: ClosePriceSource.stopLoss,
+                        label: Text(AppStrings.closeAtStopLoss),
+                      ),
+                      ButtonSegment(
+                        value: ClosePriceSource.custom,
+                        label: Text(AppStrings.closeAtCustomPrice),
+                      ),
+                    ],
+                    selected: {state.closePriceSource},
+                    onSelectionChanged: (v) => context.read<TradeFormBloc>().add(
+                          TradeFormFieldChanged(closePriceSource: v.first),
+                        ),
                   ),
+                  const SizedBox(height: AppDimens.spacingMd),
+                  if (state.closePriceSource == ClosePriceSource.custom)
+                    AppTextField(
+                      label: AppStrings.exitPrice,
+                      controller: _exitController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(exitPrice: v)),
+                    )
+                  else
+                    Text(
+                      '${AppStrings.exitPrice}: ${state.exitPrice.isEmpty ? '—' : state.exitPrice}',
+                      style: AppTextStyles.bodySmall,
+                    ),
                 ],
                 const SizedBox(height: AppDimens.spacingLg),
                 AppTextField(

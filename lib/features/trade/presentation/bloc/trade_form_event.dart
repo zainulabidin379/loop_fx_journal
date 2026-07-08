@@ -35,6 +35,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
     this.emotionBefore,
     this.emotionAfter,
     this.isClosed,
+    this.closePriceSource,
   });
 
   final TradeInstrument? instrument;
@@ -54,6 +55,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
   final EmotionBefore? emotionBefore;
   final EmotionAfter? emotionAfter;
   final bool? isClosed;
+  final ClosePriceSource? closePriceSource;
 
   @override
   List<Object?> get props => [
@@ -74,6 +76,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
         emotionBefore,
         emotionAfter,
         isClosed,
+        closePriceSource,
       ];
 }
 

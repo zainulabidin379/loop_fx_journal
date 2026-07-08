@@ -161,7 +161,7 @@ class _SettingsPageState extends State<SettingsPage> {
               const Divider(),
               ListTile(
                 title: Text(AppStrings.about, style: AppTextStyles.bodyLarge),
-                subtitle: Text('${AppStrings.version} 1.0.0', style: AppTextStyles.bodySmall),
+                subtitle: Text('${AppStrings.version} 0.0.1', style: AppTextStyles.bodySmall),
               ),
             ],
           );

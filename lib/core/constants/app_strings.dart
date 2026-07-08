@@ -51,6 +51,10 @@ abstract final class AppStrings {
   static const String saveTrade = 'Save Trade';
   static const String saveAsOpen = 'Save as Open';
   static const String closeTrade = 'Close Trade';
+  static const String closePrice = 'Close Price';
+  static const String closeAtTakeProfit = 'Take Profit';
+  static const String closeAtStopLoss = 'Stop Loss';
+  static const String closeAtCustomPrice = 'Custom';
   static const String deleteTrade = 'Delete Trade';
   static const String deleteTradeConfirm = 'Are you sure you want to delete this trade?';
   static const String instrument = 'Instrument';

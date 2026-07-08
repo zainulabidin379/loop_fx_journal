@@ -63,6 +63,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         emotionBefore: existing?.emotionBefore,
         emotionAfter: existing?.emotionAfter,
         isClosed: existing != null && existing.outcome != TradeOutcome.open,
+        closePriceSource: _inferClosePriceSource(existing),
         strategies: strategies,
         settings: settings,
         plannedRR: existing?.riskRewardPlanned,
@@ -77,14 +78,28 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
   }
 
   void _onFieldChanged(TradeFormFieldChanged event, Emitter<TradeFormState> emit) {
+    final nextTakeProfit = event.takeProfit ?? state.takeProfit;
+    final nextStopLoss = event.stopLoss ?? state.stopLoss;
+    final nextClosePriceSource = event.closePriceSource ?? state.closePriceSource;
+    var nextExitPrice = event.exitPrice ?? state.exitPrice;
+    final nextIsClosed = event.isClosed ?? state.isClosed;
+
+    if (nextIsClosed) {
+      nextExitPrice = switch (nextClosePriceSource) {
+        ClosePriceSource.takeProfit => nextTakeProfit,
+        ClosePriceSource.stopLoss => nextStopLoss,
+        ClosePriceSource.custom => nextExitPrice,
+      };
+    }
+
     final next = state.copyWith(
       instrument: event.instrument ?? state.instrument,
       customInstrument: event.customInstrument ?? state.customInstrument,
       direction: event.direction ?? state.direction,
       entryPrice: event.entryPrice ?? state.entryPrice,
-      exitPrice: event.exitPrice ?? state.exitPrice,
+      exitPrice: nextExitPrice,
       stopLoss: event.stopLoss ?? state.stopLoss,
-      takeProfit: event.takeProfit ?? state.takeProfit,
+      takeProfit: nextTakeProfit,
       lotSize: event.lotSize ?? state.lotSize,
       entryDateTime: event.entryDateTime ?? state.entryDateTime,
       exitDateTime: event.exitDateTime ?? state.exitDateTime,
@@ -94,7 +109,8 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       screenshotPaths: event.screenshotPaths ?? state.screenshotPaths,
       emotionBefore: event.emotionBefore ?? state.emotionBefore,
       emotionAfter: event.emotionAfter ?? state.emotionAfter,
-      isClosed: event.isClosed ?? state.isClosed,
+      isClosed: nextIsClosed,
+      closePriceSource: nextClosePriceSource,
     );
 
     final entry = double.tryParse(next.entryPrice);
@@ -186,5 +202,16 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       stopLoss: stopLoss,
       instrument: instrument,
     );
+  }
+
+  ClosePriceSource _inferClosePriceSource(Trade? trade) {
+    if (trade?.exitPrice == null) return ClosePriceSource.custom;
+    if (trade!.takeProfit != null && trade.exitPrice == trade.takeProfit) {
+      return ClosePriceSource.takeProfit;
+    }
+    if (trade.exitPrice == trade.stopLoss) {
+      return ClosePriceSource.stopLoss;
+    }
+    return ClosePriceSource.custom;
   }
 }
