@@ -19,7 +19,7 @@ class NotificationService {
       iOS: iosSettings,
     );
 
-    await _notifications.initialize(settings);
+    await _notifications.initialize(settings: settings);
     _initialized = true;
   }
 
@@ -39,21 +39,21 @@ class NotificationService {
     );
 
     await _notifications.show(
-      0,
-      'LOOP',
-      "You haven't logged a trade in 24 hours. Keep your journal up to date.",
-      details,
+      id: 0,
+      title: 'LOOP',
+      body: "You haven't logged a trade in 24 hours. Keep your journal up to date.",
+      notificationDetails: details,
     );
   }
 
   Future<void> scheduleDailyReminder() async {
     await initialize();
     await _notifications.zonedSchedule(
-      1,
-      'LOOP',
-      'Time to review and log your trades.',
-      _nextInstanceOf9AM(),
-      const NotificationDetails(
+      id: 1,
+      title: 'LOOP',
+      body: 'Time to review and log your trades.',
+      scheduledDate: _nextInstanceOf9AM(),
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'loop_reminders',
           'Trade Log Reminders',

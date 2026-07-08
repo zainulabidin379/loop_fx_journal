@@ -33,10 +33,7 @@ class LocalAuthDatasource {
     try {
       return await _localAuth.authenticate(
         localizedReason: 'Authenticate to access LOOP',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: false,
-        ),
+        biometricOnly: false,
       );
     } catch (_) {
       return false;

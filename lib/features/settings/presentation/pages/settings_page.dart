@@ -48,7 +48,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _importData() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['json']);
     if (result != null && result.files.single.path != null) {
       final content = await File(result.files.single.path!).readAsString();
       if (mounted) {
