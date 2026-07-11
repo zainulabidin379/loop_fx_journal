@@ -45,7 +45,12 @@ class _TradeListPageState extends State<TradeListPage> {
             );
           }
           return ListView.separated(
-            padding: const EdgeInsets.all(AppDimens.spacingLg),
+            padding: const EdgeInsets.only(
+              left: AppDimens.spacingLg,
+              right: AppDimens.spacingLg,
+              top: AppDimens.spacingLg,
+              bottom: AppDimens.spacingXxl,
+            ),
             itemCount: state.trades.length,
             separatorBuilder: (_, _) => const SizedBox(height: AppDimens.spacingSm),
             itemBuilder: (context, index) {

@@ -8,7 +8,6 @@ import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart';
 import '../../features/dashboard/presentation/pages/dashboard_page.dart';
-import '../../features/dashboard/presentation/pages/recap_page.dart';
 import '../../features/settings/domain/usecases/settings_usecases.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
@@ -111,10 +110,6 @@ class AppRouter {
               ],
             ),
           ],
-        ),
-        GoRoute(
-          path: '/recap',
-          builder: (context, state) => const RecapPage(),
         ),
       ],
     );

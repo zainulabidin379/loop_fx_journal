@@ -47,6 +47,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           worstTrade: DashboardAnalytics.worstTrade(filtered),
           streak: DashboardAnalytics.computeStreak(filtered),
           weeklyRecap: DashboardAnalytics.weeklyRecap(allTrades),
+          monthlyRecap: DashboardAnalytics.monthlyRecap(allTrades),
         ),
       );
     } catch (_) {

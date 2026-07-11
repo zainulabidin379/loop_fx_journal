@@ -146,10 +146,12 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   controller: _entryController,
                   isDecimal: true,
                   isRequired: true,
+                  textInputAction: TextInputAction.next,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(entryPrice: v)),
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
+                  textInputAction: TextInputAction.next,
                   label: AppStrings.stopLoss,
                   controller: _slController,
                   isDecimal: true,
@@ -157,6 +159,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
+                  textInputAction: TextInputAction.next,
                   label: AppStrings.takeProfit,
                   controller: _tpController,
                   isDecimal: true,
@@ -164,6 +167,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
                 AppTextField(
+                  textInputAction: TextInputAction.done,
                   label: AppStrings.lotSize,
                   controller: _lotController,
                   isDecimal: true,

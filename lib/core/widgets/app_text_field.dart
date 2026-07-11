@@ -19,6 +19,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.isDecimal = false,
     this.isRequired = false,
+    this.textInputAction,
     this.inputFormatters,
   });
 
@@ -34,6 +35,7 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final bool isDecimal;
   final bool isRequired;
+  final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
 
   @override
@@ -63,6 +65,7 @@ class AppTextField extends StatelessWidget {
           onChanged: onChanged,
           readOnly: readOnly,
           onTap: onTap,
+          textInputAction: textInputAction,
           style: AppTextStyles.bodyMedium,
           decoration: InputDecoration(hintText: hint, suffixIcon: suffixIcon),
         ),

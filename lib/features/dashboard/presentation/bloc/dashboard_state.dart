@@ -31,6 +31,7 @@ class DashboardState extends Equatable {
       longestLossStreak: 0,
     ),
     this.weeklyRecap,
+    this.monthlyRecap,
   });
 
   final DashboardStatus status;
@@ -49,6 +50,7 @@ class DashboardState extends Equatable {
   final TradeHighlight? worstTrade;
   final StreakInfo streak;
   final RecapSummary? weeklyRecap;
+  final RecapSummary? monthlyRecap;
 
   DashboardState copyWith({
     DashboardStatus? status,
@@ -67,6 +69,7 @@ class DashboardState extends Equatable {
     TradeHighlight? worstTrade,
     StreakInfo? streak,
     RecapSummary? weeklyRecap,
+    RecapSummary? monthlyRecap,
   }) {
     return DashboardState(
       status: status ?? this.status,
@@ -85,6 +88,7 @@ class DashboardState extends Equatable {
       worstTrade: worstTrade ?? this.worstTrade,
       streak: streak ?? this.streak,
       weeklyRecap: weeklyRecap ?? this.weeklyRecap,
+      monthlyRecap: monthlyRecap ?? this.monthlyRecap,
     );
   }
 
@@ -106,5 +110,6 @@ class DashboardState extends Equatable {
         worstTrade,
         streak,
         weeklyRecap,
+        monthlyRecap,
       ];
 }

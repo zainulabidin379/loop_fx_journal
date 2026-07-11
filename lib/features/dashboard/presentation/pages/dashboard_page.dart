@@ -54,10 +54,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.dashboardTitle),
-        actions: [IconButton(icon: const Icon(Icons.summarize_outlined), onPressed: () => context.push('/recap'))],
-      ),
+      appBar: AppBar(title: const Text(AppStrings.dashboardTitle)),
       floatingActionButton: FloatingActionButton(onPressed: () => context.push('/trades/add'), child: const Icon(Icons.add)),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
@@ -161,6 +158,12 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
                 ],
+                if (state.weeklyRecap != null || state.monthlyRecap != null) ...[
+                  const SizedBox(height: AppDimens.spacingLg),
+                  if (state.weeklyRecap != null) _RecapCard(summary: state.weeklyRecap!),
+                  if (state.weeklyRecap != null && state.monthlyRecap != null) const SizedBox(height: AppDimens.spacingMd),
+                  if (state.monthlyRecap != null) _RecapCard(summary: state.monthlyRecap!),
+                ],
               ],
             ),
           );
@@ -217,6 +220,36 @@ class _OpenTradesSection extends StatelessWidget {
               onTap: () => context.push('/trades/${trade.id}'),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecapCard extends StatelessWidget {
+  const _RecapCard({required this.summary});
+
+  final RecapSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(summary.periodLabel, style: AppTextStyles.headlineMedium),
+          const SizedBox(height: AppDimens.spacingMd),
+          Text(
+            '${summary.tradeCount} ${AppStrings.recapTrades} · ${CurrencyFormatter.formatPercent(summary.winRate)} ${AppStrings.winRate.toLowerCase()}',
+            style: AppTextStyles.bodyMedium,
+          ),
+          const SizedBox(height: AppDimens.spacingSm),
+          Text(
+            CurrencyFormatter.format(summary.totalPnl),
+            style: AppTextStyles.metricValue.copyWith(color: summary.totalPnl >= 0 ? AppColors.profit : AppColors.loss),
+          ),
+          const SizedBox(height: AppDimens.spacingSm),
+          Text('${AppStrings.recapBestPair}: ${summary.bestInstrument}', style: AppTextStyles.bodySmall),
         ],
       ),
     );
