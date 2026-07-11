@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -7,13 +6,13 @@ import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/di/injection_container.dart';
+import '../../../../core/services/trade_refresh_service.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../domain/entities/trade.dart';
 import '../../domain/usecases/trade_usecases.dart';
-import '../bloc/trade_list_bloc.dart';
 
 class TradeDetailPage extends StatefulWidget {
   const TradeDetailPage({super.key, required this.tradeId});
@@ -38,6 +37,11 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
     if (mounted) setState(() => _trade = trade);
   }
 
+  Future<void> _openEdit() async {
+    await context.push('/trades/${widget.tradeId}/edit');
+    if (mounted) await _load();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_trade == null) {
@@ -51,7 +55,7 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
       appBar: AppBar(
         title: const Text(AppStrings.tradeDetail),
         actions: [
-          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: () => context.push('/trades/${trade.id}/edit')),
+          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: _openEdit),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () async {
@@ -67,7 +71,9 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
                 ),
               );
               if (confirm == true && context.mounted) {
-                context.read<TradeListBloc>().add(TradeDeleteRequested(trade.id));
+                await sl<DeleteTrade>()(trade.id);
+                refreshTradeScreens();
+                if (!context.mounted) return;
                 context.pop();
               }
             },
@@ -92,10 +98,10 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
             ),
           ),
           const SizedBox(height: AppDimens.spacingXl),
-          _DetailRow(label: AppStrings.entryPrice, value: NumberFormatter.format(trade.entryPrice)),
-          if (trade.exitPrice != null) _DetailRow(label: AppStrings.exitPrice, value: NumberFormatter.format(trade.exitPrice)),
-          _DetailRow(label: AppStrings.stopLoss, value: NumberFormatter.format(trade.stopLoss)),
-          if (trade.takeProfit != null) _DetailRow(label: AppStrings.takeProfit, value: NumberFormatter.format(trade.takeProfit)),
+          _DetailRow(label: AppStrings.entryPrice, value: trade.entryPrice.toString()),
+          if (trade.exitPrice != null) _DetailRow(label: AppStrings.exitPrice, value: trade.exitPrice.toString()),
+          if (trade.stopLoss != null) _DetailRow(label: AppStrings.stopLoss, value: trade.stopLoss.toString()),
+          if (trade.takeProfit != null) _DetailRow(label: AppStrings.takeProfit, value: trade.takeProfit.toString()),
           _DetailRow(label: AppStrings.lotSize, value: NumberFormatter.format(trade.lotSize)),
           _DetailRow(label: AppStrings.entryDate, value: DateFormatter.formatDateTime(trade.entryDateTime)),
           if (trade.exitDateTime != null) _DetailRow(label: AppStrings.exitDate, value: DateFormatter.formatDateTime(trade.exitDateTime!)),
@@ -119,7 +125,7 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
             ),
           ],
           const SizedBox(height: AppDimens.spacingXl),
-          if (trade.isOpen) AppButton(label: AppStrings.closeTrade, onPressed: () => context.push('/trades/${trade.id}/edit')),
+          if (trade.isOpen) AppButton(label: AppStrings.closeTrade, onPressed: _openEdit),
         ],
       ),
     );

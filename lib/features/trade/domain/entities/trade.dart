@@ -134,7 +134,7 @@ class Trade extends Equatable {
   final TradeDirection direction;
   final double entryPrice;
   final double? exitPrice;
-  final double stopLoss;
+  final double? stopLoss;
   final double? takeProfit;
   final double lotSize;
   final DateTime entryDateTime;

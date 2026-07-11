@@ -30,6 +30,7 @@ class TradeFormState extends Equatable {
     this.settings,
     this.plannedRR,
     this.suggestedLot,
+    this.validationError,
   });
 
   final TradeFormStatus status;
@@ -56,6 +57,7 @@ class TradeFormState extends Equatable {
   final AppSettings? settings;
   final double? plannedRR;
   final double? suggestedLot;
+  final String? validationError;
 
   TradeFormState copyWith({
     TradeFormStatus? status,
@@ -82,6 +84,8 @@ class TradeFormState extends Equatable {
     AppSettings? settings,
     double? plannedRR,
     double? suggestedLot,
+    String? validationError,
+    bool clearValidationError = false,
   }) {
     return TradeFormState(
       status: status ?? this.status,
@@ -108,6 +112,7 @@ class TradeFormState extends Equatable {
       settings: settings ?? this.settings,
       plannedRR: plannedRR ?? this.plannedRR,
       suggestedLot: suggestedLot ?? this.suggestedLot,
+      validationError: clearValidationError ? null : (validationError ?? this.validationError),
     );
   }
 
@@ -137,5 +142,6 @@ class TradeFormState extends Equatable {
         settings,
         plannedRR,
         suggestedLot,
+        validationError,
       ];
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
-import '../utils/number_formatter.dart';
 
 class AppTextField extends StatelessWidget {
   const AppTextField({
@@ -17,6 +18,7 @@ class AppTextField extends StatelessWidget {
     this.onTap,
     this.suffixIcon,
     this.isDecimal = false,
+    this.isRequired = false,
     this.inputFormatters,
   });
 
@@ -31,6 +33,7 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final Widget? suffixIcon;
   final bool isDecimal;
+  final bool isRequired;
   final List<TextInputFormatter>? inputFormatters;
 
   @override
@@ -38,26 +41,30 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.labelMedium),
+        Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: label, style: AppTextStyles.labelMedium),
+              if (isRequired)
+                TextSpan(
+                  text: ' *',
+                  style: AppTextStyles.labelMedium.copyWith(color: AppColors.loss),
+                ),
+            ],
+          ),
+        ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          keyboardType: isDecimal
-              ? const TextInputType.numberWithOptions(decimal: true)
-              : keyboardType,
-          inputFormatters: isDecimal
-              ? [const DecimalTextInputFormatter(), ...?inputFormatters]
-              : inputFormatters,
+          keyboardType: isDecimal ? const TextInputType.numberWithOptions(decimal: true) : keyboardType,
+          inputFormatters: isDecimal ? inputFormatters : inputFormatters,
           maxLines: maxLines,
           validator: validator,
           onChanged: onChanged,
           readOnly: readOnly,
           onTap: onTap,
           style: AppTextStyles.bodyMedium,
-          decoration: InputDecoration(
-            hintText: hint,
-            suffixIcon: suffixIcon,
-          ),
+          decoration: InputDecoration(hintText: hint, suffixIcon: suffixIcon),
         ),
       ],
     );

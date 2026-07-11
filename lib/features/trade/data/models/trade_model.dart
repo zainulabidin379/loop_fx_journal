@@ -12,7 +12,7 @@ class TradeModel extends HiveObject {
     required this.directionIndex,
     required this.entryPrice,
     this.exitPrice,
-    required this.stopLoss,
+    this.stopLoss,
     this.takeProfit,
     required this.lotSize,
     required this.entryDateTime,
@@ -50,7 +50,7 @@ class TradeModel extends HiveObject {
   double? exitPrice;
 
   @HiveField(6)
-  double stopLoss;
+  double? stopLoss;
 
   @HiveField(7)
   double? takeProfit;

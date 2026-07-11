@@ -74,7 +74,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => UpdateTrade(sl()));
   sl.registerLazySingleton(() => DeleteTrade(sl()));
   sl.registerLazySingleton(() => GetOpenTrades(sl()));
-  sl.registerFactory(() => TradeListBloc(getTrades: sl(), deleteTrade: sl()));
+  sl.registerLazySingleton(() => TradeListBloc(getTrades: sl(), deleteTrade: sl()));
   sl.registerFactory(
     () => TradeFormBloc(
       addTrade: sl(),
@@ -124,7 +124,7 @@ Future<void> initDependencies() async {
   );
 
   // Dashboard
-  sl.registerFactory(
+  sl.registerLazySingleton(
     () => DashboardBloc(
       getTrades: sl(),
       getOpenTrades: sl(),

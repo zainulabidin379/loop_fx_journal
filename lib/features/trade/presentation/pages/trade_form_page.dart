@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../core/services/trade_refresh_service.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -81,7 +82,13 @@ class _TradeFormPageState extends State<TradeFormPage> {
       ),
       body: BlocConsumer<TradeFormBloc, TradeFormState>(
         listener: (context, state) {
+          if (state.validationError != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.validationError!)),
+            );
+          }
           if (state.status == TradeFormStatus.saved) {
+            refreshTradeScreens();
             context.pop();
           }
         },
@@ -138,6 +145,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   label: AppStrings.entryPrice,
                   controller: _entryController,
                   isDecimal: true,
+                  isRequired: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(entryPrice: v)),
                 ),
                 const SizedBox(height: AppDimens.spacingMd),
@@ -159,6 +167,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   label: AppStrings.lotSize,
                   controller: _lotController,
                   isDecimal: true,
+                  isRequired: true,
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(lotSize: v)),
                 ),
                 if (state.plannedRR != null) ...[

@@ -2,14 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../settings/domain/entities/app_settings.dart';
 import '../../../settings/domain/usecases/settings_usecases.dart';
 import '../../../strategy/domain/entities/strategy.dart';
 import '../../../strategy/domain/usecases/strategy_usecases.dart';
 import '../../domain/entities/trade.dart';
 import '../../domain/usecases/trade_usecases.dart';
-import '../../../../core/utils/number_formatter.dart';
 import '../../domain/utils/trade_calculator.dart';
 
 part 'trade_form_event.dart';
@@ -123,6 +124,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
 
     emit(
       next.copyWith(
+        clearValidationError: true,
         plannedRR: entry != null && sl != null
             ? TradeCalculator.plannedRiskReward(direction: next.direction, entryPrice: entry, stopLoss: sl, takeProfit: tp)
             : null,
@@ -132,19 +134,28 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
   }
 
   Future<void> _onSave(TradeFormSaveRequested event, Emitter<TradeFormState> emit) async {
-    emit(state.copyWith(status: TradeFormStatus.saving));
-    final entry = NumberFormatter.round(double.parse(state.entryPrice));
-    final sl = NumberFormatter.round(double.parse(state.stopLoss));
-    final lot = NumberFormatter.round(double.parse(state.lotSize));
-    final tp = state.takeProfit.isEmpty ? null : NumberFormatter.round(double.parse(state.takeProfit));
-    final exit = state.exitPrice.isEmpty ? null : NumberFormatter.round(double.parse(state.exitPrice));
+    final validationError = _validateForm();
+    if (validationError != null) {
+      emit(state.copyWith(validationError: validationError));
+      return;
+    }
+
+    emit(state.copyWith(status: TradeFormStatus.saving, clearValidationError: true));
+
+    final entry = _parseRequired(state.entryPrice)!;
+    final slParsed = _parseRequired(state.stopLoss);
+    final lot = NumberFormatter.round(_parseRequired(state.lotSize)!);
+    final tp = state.takeProfit.trim().isEmpty ? null : _parseRequired(state.takeProfit);
+    final exitParsed = state.isClosed ? _parseRequired(_resolvedExitPrice()) : null;
+    final exit = exitParsed;
+    final isClosed = state.isClosed && exit != null;
 
     double? pnl;
     double? pnlPips;
     double? actualRR;
     TradeOutcome outcome = TradeOutcome.open;
 
-    if (state.isClosed && exit != null) {
+    if (isClosed) {
       pnlPips = TradeCalculator.calculatePnlPips(
         instrument: state.instrument,
         direction: state.direction,
@@ -152,9 +163,11 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         exitPrice: exit,
       );
       pnl = NumberFormatter.roundNullable((pnlPips ?? 0) * 10 * lot);
-      actualRR = NumberFormatter.roundNullable(
-        TradeCalculator.actualRiskReward(direction: state.direction, entryPrice: entry, stopLoss: sl, exitPrice: exit),
-      );
+      if (slParsed != null && slParsed > 0) {
+        actualRR = NumberFormatter.roundNullable(
+          TradeCalculator.actualRiskReward(direction: state.direction, entryPrice: entry, stopLoss: slParsed, exitPrice: exit),
+        );
+      }
       pnlPips = NumberFormatter.roundNullable(pnlPips);
       outcome = TradeCalculator.outcomeFromPnl(pnl);
     }
@@ -166,12 +179,12 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       direction: state.direction,
       entryPrice: entry,
       exitPrice: exit,
-      stopLoss: sl,
+      stopLoss: slParsed,
       takeProfit: tp,
       lotSize: lot,
       entryDateTime: state.entryDateTime ?? DateTime.now(),
-      exitDateTime: state.isClosed ? (state.exitDateTime ?? DateTime.now()) : null,
-      outcome: state.isClosed ? outcome : TradeOutcome.open,
+      exitDateTime: isClosed ? (state.exitDateTime ?? DateTime.now()) : null,
+      outcome: isClosed ? outcome : TradeOutcome.open,
       pnl: pnl,
       pnlPips: pnlPips,
       riskRewardPlanned: NumberFormatter.roundNullable(state.plannedRR),
@@ -185,12 +198,16 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       accountBalanceAtEntry: state.settings?.startingBalance,
     );
 
-    if (state.tradeId != null) {
-      await _updateTrade(trade);
-    } else {
-      await _addTrade(trade);
+    try {
+      if (state.tradeId != null) {
+        await _updateTrade(trade);
+      } else {
+        await _addTrade(trade);
+      }
+      emit(state.copyWith(status: TradeFormStatus.saved));
+    } catch (_) {
+      emit(state.copyWith(status: TradeFormStatus.editing, validationError: AppStrings.error));
     }
-    emit(state.copyWith(status: TradeFormStatus.saved));
   }
 
   double? _computeSuggestedLot({
@@ -220,5 +237,41 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       return ClosePriceSource.stopLoss;
     }
     return ClosePriceSource.custom;
+  }
+
+  double? _parseRequired(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return null;
+    return double.tryParse(trimmed);
+  }
+
+  String _resolvedExitPrice() {
+    return switch (state.closePriceSource) {
+      ClosePriceSource.takeProfit => state.takeProfit,
+      ClosePriceSource.stopLoss => state.stopLoss,
+      ClosePriceSource.custom => state.exitPrice,
+    };
+  }
+
+  String? _validateForm() {
+    if (_parseRequired(state.entryPrice) == null) return '${AppStrings.entryPrice} is required';
+    if (_parseRequired(state.lotSize) == null) return '${AppStrings.lotSize} is required';
+
+    if (state.stopLoss.trim().isNotEmpty && _parseRequired(state.stopLoss) == null) {
+      return '${AppStrings.stopLoss} must be a valid number';
+    }
+
+    if (state.takeProfit.trim().isNotEmpty && _parseRequired(state.takeProfit) == null) {
+      return '${AppStrings.takeProfit} must be a valid number';
+    }
+
+    if (state.isClosed &&
+        state.closePriceSource == ClosePriceSource.custom &&
+        state.exitPrice.trim().isNotEmpty &&
+        _parseRequired(state.exitPrice) == null) {
+      return '${AppStrings.exitPrice} must be a valid number';
+    }
+
+    return null;
   }
 }

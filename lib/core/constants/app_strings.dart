@@ -131,6 +131,11 @@ abstract final class AppStrings {
   static const String confirm = 'Confirm';
   static const String retry = 'Retry';
   static const String error = 'Something went wrong';
+  static const String fieldRequired = 'This field is required';
+  static const String invalidNumber = 'Enter a valid number';
+  static const String exitPriceRequired = 'Exit price is required to close this trade';
+  static const String takeProfitRequiredToClose = 'Take profit is required to close at TP';
+  static const String stopLossRequiredToClose = 'Stop loss is required to close at SL';
   static const String wins = 'Wins';
   static const String losses = 'Losses';
   static const String breakeven = 'Breakeven';

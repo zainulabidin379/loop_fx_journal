@@ -50,8 +50,8 @@ class AppRouter {
           builder: (context, state, child) => MultiBlocProvider(
             providers: [
               BlocProvider(create: (_) => sl<AuthBloc>()),
-              BlocProvider(create: (_) => sl<DashboardBloc>()),
-              BlocProvider(create: (_) => sl<TradeListBloc>()),
+              BlocProvider.value(value: sl<DashboardBloc>()),
+              BlocProvider.value(value: sl<TradeListBloc>()),
               BlocProvider(create: (_) => sl<SettingsCubit>()),
             ],
             child: AppShell(child: child),
@@ -76,10 +76,8 @@ class AppRouter {
                 GoRoute(
                   path: ':id',
                   parentNavigatorKey: _rootNavigatorKey,
-                  builder: (context, state) => BlocProvider(
-                    create: (_) => sl<TradeListBloc>(),
-                    child: TradeDetailPage(tradeId: state.pathParameters['id']!),
-                  ),
+                  builder: (context, state) =>
+                      TradeDetailPage(tradeId: state.pathParameters['id']!),
                   routes: [
                     GoRoute(
                       path: 'edit',
