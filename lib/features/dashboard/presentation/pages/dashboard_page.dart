@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
@@ -54,7 +55,17 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text(AppStrings.dashboardTitle)),
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(AppAssets.logo, width: AppDimens.iconLg, height: AppDimens.iconLg),
+            const SizedBox(width: AppDimens.spacingMd),
+            Text(AppStrings.appName, style: AppTextStyles.displayLarge.copyWith(color: AppColors.accent)),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(onPressed: () => context.push('/trades/add'), child: const Icon(Icons.add)),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {

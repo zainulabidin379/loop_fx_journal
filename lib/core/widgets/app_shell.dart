@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
+
 import '../../../core/constants/app_strings.dart';
 
 class AppShell extends StatelessWidget {
@@ -33,9 +35,18 @@ class AppShell extends StatelessWidget {
         currentIndex: _selectedIndex(context),
         onTap: (index) => _onTap(context, index),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), label: AppStrings.navDashboard),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt_outlined), label: AppStrings.navTrades),
-          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: AppStrings.navSettings),
+          BottomNavigationBarItem(
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedDashboardSquare02),
+            label: AppStrings.navDashboard,
+          ),
+          BottomNavigationBarItem(
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedExchange03),
+            label: AppStrings.navTrades,
+          ),
+          BottomNavigationBarItem(
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedSettings01),
+            label: AppStrings.navSettings,
+          ),
         ],
       ),
     );

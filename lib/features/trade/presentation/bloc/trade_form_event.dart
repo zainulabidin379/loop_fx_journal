@@ -25,6 +25,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
     this.exitPrice,
     this.stopLoss,
     this.takeProfit,
+    this.breakeven,
     this.lotSize,
     this.entryDateTime,
     this.exitDateTime,
@@ -45,6 +46,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
   final String? exitPrice;
   final String? stopLoss;
   final String? takeProfit;
+  final String? breakeven;
   final String? lotSize;
   final DateTime? entryDateTime;
   final DateTime? exitDateTime;
@@ -66,6 +68,7 @@ class TradeFormFieldChanged extends TradeFormEvent {
         exitPrice,
         stopLoss,
         takeProfit,
+        breakeven,
         lotSize,
         entryDateTime,
         exitDateTime,

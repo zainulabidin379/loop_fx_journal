@@ -82,6 +82,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
   void _onFieldChanged(TradeFormFieldChanged event, Emitter<TradeFormState> emit) {
     final nextTakeProfit = event.takeProfit ?? state.takeProfit;
     final nextStopLoss = event.stopLoss ?? state.stopLoss;
+    final nextBreakeven = event.breakeven ?? state.entryPrice;
     final nextClosePriceSource = event.closePriceSource ?? state.closePriceSource;
     var nextExitPrice = event.exitPrice ?? state.exitPrice;
     final nextIsClosed = event.isClosed ?? state.isClosed;
@@ -90,6 +91,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
       nextExitPrice = switch (nextClosePriceSource) {
         ClosePriceSource.takeProfit => nextTakeProfit,
         ClosePriceSource.stopLoss => nextStopLoss,
+        ClosePriceSource.breakeven => nextBreakeven,
         ClosePriceSource.custom => nextExitPrice,
       };
       if (nextExitPrice.isNotEmpty) {
@@ -249,6 +251,7 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
     return switch (state.closePriceSource) {
       ClosePriceSource.takeProfit => state.takeProfit,
       ClosePriceSource.stopLoss => state.stopLoss,
+      ClosePriceSource.breakeven => state.entryPrice,
       ClosePriceSource.custom => state.exitPrice,
     };
   }

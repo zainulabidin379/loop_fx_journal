@@ -2,7 +2,7 @@ part of 'trade_form_bloc.dart';
 
 enum TradeFormStatus { initial, loading, editing, saving, saved, error }
 
-enum ClosePriceSource { takeProfit, stopLoss, custom }
+enum ClosePriceSource { takeProfit, stopLoss, breakeven, custom }
 
 class TradeFormState extends Equatable {
   const TradeFormState({

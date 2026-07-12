@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../../core/services/trade_refresh_service.dart';
+
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
+import '../../../../core/services/trade_refresh_service.dart';
 import '../../../../core/utils/currency_formatter.dart';
-import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/utils/number_formatter.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../trade/domain/entities/trade.dart';
@@ -66,26 +68,18 @@ class _TradeFormPageState extends State<TradeFormPage> {
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       if (!mounted) return;
-      context.read<TradeFormBloc>().add(
-            TradeFormFieldChanged(
-              screenshotPaths: [...state.screenshotPaths, image.path],
-            ),
-          );
+      context.read<TradeFormBloc>().add(TradeFormFieldChanged(screenshotPaths: [...state.screenshotPaths, image.path]));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.tradeId == null ? AppStrings.addTrade : AppStrings.editTrade),
-      ),
+      appBar: AppBar(title: Text(widget.tradeId == null ? AppStrings.addTrade : AppStrings.editTrade)),
       body: BlocConsumer<TradeFormBloc, TradeFormState>(
         listener: (context, state) {
           if (state.validationError != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.validationError!)),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.validationError!)));
           }
           if (state.status == TradeFormStatus.saved) {
             refreshTradeScreens();
@@ -109,11 +103,15 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   spacing: AppDimens.spacingSm,
                   children: TradeInstrument.values.map((instrument) {
                     return ChoiceChip(
-                      label: Text(instrument.label),
+                      label: Text(
+                        instrument.label,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: state.instrument == instrument ? AppColors.accent : AppColors.textSecondary,
+                        ),
+                      ),
+                      checkmarkColor: AppColors.accent,
                       selected: state.instrument == instrument,
-                      onSelected: (_) => context.read<TradeFormBloc>().add(
-                            TradeFormFieldChanged(instrument: instrument),
-                          ),
+                      onSelected: (_) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(instrument: instrument)),
                     );
                   }).toList(),
                 ),
@@ -122,9 +120,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   AppTextField(
                     label: AppStrings.customInstrument,
                     controller: _customInstrumentController,
-                    onChanged: (v) => context.read<TradeFormBloc>().add(
-                          TradeFormFieldChanged(customInstrument: v),
-                        ),
+                    onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(customInstrument: v)),
                   ),
                 ],
                 const SizedBox(height: AppDimens.spacingLg),
@@ -135,10 +131,13 @@ class _TradeFormPageState extends State<TradeFormPage> {
                     ButtonSegment(value: TradeDirection.long, label: Text(AppStrings.long)),
                     ButtonSegment(value: TradeDirection.short, label: Text(AppStrings.short)),
                   ],
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: AppColors.background,
+                    selectedBackgroundColor: state.direction == TradeDirection.long ? AppColors.profit : AppColors.loss,
+                    padding: EdgeInsets.zero,
+                  ),
                   selected: {state.direction},
-                  onSelectionChanged: (v) => context.read<TradeFormBloc>().add(
-                        TradeFormFieldChanged(direction: v.first),
-                      ),
+                  onSelectionChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(direction: v.first)),
                 ),
                 const SizedBox(height: AppDimens.spacingLg),
                 AppTextField(
@@ -176,25 +175,17 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 ),
                 if (state.plannedRR != null) ...[
                   const SizedBox(height: AppDimens.spacingSm),
-                  Text('${AppStrings.plannedRR}: ${CurrencyFormatter.formatRatio(state.plannedRR)}',
-                      style: AppTextStyles.bodySmall),
+                  Text('${AppStrings.plannedRR}: ${CurrencyFormatter.formatRatio(state.plannedRR)}', style: AppTextStyles.bodySmall),
                 ],
                 if (state.suggestedLot != null) ...[
                   const SizedBox(height: AppDimens.spacingSm),
-                  Text(
-                    '${AppStrings.suggestedLotSize}: ${NumberFormatter.format(state.suggestedLot)}',
-                    style: AppTextStyles.bodySmall,
-                  ),
+                  Text('${AppStrings.suggestedLotSize}: ${NumberFormatter.format(state.suggestedLot)}', style: AppTextStyles.bodySmall),
                 ],
                 const SizedBox(height: AppDimens.spacingLg),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(AppStrings.entryDate, style: AppTextStyles.labelMedium),
-                  subtitle: Text(
-                    state.entryDateTime != null
-                        ? DateFormatter.formatDateTime(state.entryDateTime!)
-                        : '—',
-                  ),
+                  subtitle: Text(state.entryDateTime != null ? DateFormatter.formatDateTime(state.entryDateTime!) : '—'),
                   trailing: const Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(
@@ -210,16 +201,8 @@ class _TradeFormPageState extends State<TradeFormPage> {
                       );
                       if (time != null && context.mounted) {
                         context.read<TradeFormBloc>().add(
-                              TradeFormFieldChanged(
-                                entryDateTime: DateTime(
-                                  date.year,
-                                  date.month,
-                                  date.day,
-                                  time.hour,
-                                  time.minute,
-                                ),
-                              ),
-                            );
+                          TradeFormFieldChanged(entryDateTime: DateTime(date.year, date.month, date.day, time.hour, time.minute)),
+                        );
                       }
                     }
                   },
@@ -230,9 +213,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   decoration: const InputDecoration(labelText: AppStrings.strategy),
                   items: [
                     const DropdownMenuItem(value: null, child: Text(AppStrings.noStrategy)),
-                    ...state.strategies.map(
-                      (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
-                    ),
+                    ...state.strategies.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
                   ],
                   onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(strategyId: v)),
                 ),
@@ -246,25 +227,25 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 if (state.isClosed) ...[
                   Text(AppStrings.closePrice, style: AppTextStyles.labelMedium),
                   const SizedBox(height: AppDimens.spacingSm),
-                  SegmentedButton<ClosePriceSource>(
-                    segments: const [
-                      ButtonSegment(
-                        value: ClosePriceSource.takeProfit,
-                        label: Text(AppStrings.closeAtTakeProfit),
+                  SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<ClosePriceSource>(
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(value: ClosePriceSource.takeProfit, label: Text(AppStrings.closeAtTakeProfit)),
+                        ButtonSegment(value: ClosePriceSource.stopLoss, label: Text(AppStrings.closeAtStopLoss)),
+                        ButtonSegment(value: ClosePriceSource.breakeven, label: Text(AppStrings.closeAtBreakeven)),
+                        ButtonSegment(value: ClosePriceSource.custom, label: Text(AppStrings.closeAtCustomPrice)),
+                      ],
+                      style: SegmentedButton.styleFrom(
+                        backgroundColor: AppColors.background,
+                        selectedBackgroundColor: AppColors.profit,
+                        padding: const EdgeInsets.symmetric(horizontal: AppDimens.spacingXs),
+                        textStyle: AppTextStyles.bodySmall,
                       ),
-                      ButtonSegment(
-                        value: ClosePriceSource.stopLoss,
-                        label: Text(AppStrings.closeAtStopLoss),
-                      ),
-                      ButtonSegment(
-                        value: ClosePriceSource.custom,
-                        label: Text(AppStrings.closeAtCustomPrice),
-                      ),
-                    ],
-                    selected: {state.closePriceSource},
-                    onSelectionChanged: (v) => context.read<TradeFormBloc>().add(
-                          TradeFormFieldChanged(closePriceSource: v.first),
-                        ),
+                      selected: {state.closePriceSource},
+                      onSelectionChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(closePriceSource: v.first)),
+                    ),
                   ),
                   const SizedBox(height: AppDimens.spacingMd),
                   if (state.closePriceSource == ClosePriceSource.custom)
@@ -275,10 +256,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                       onChanged: (v) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(exitPrice: v)),
                     )
                   else
-                    Text(
-                      '${AppStrings.exitPrice}: ${state.exitPrice.isEmpty ? '—' : state.exitPrice}',
-                      style: AppTextStyles.bodySmall,
-                    ),
+                    Text('${AppStrings.exitPrice}: ${state.exitPrice.isEmpty ? '—' : state.exitPrice}', style: AppTextStyles.bodySmall),
                 ],
                 const SizedBox(height: AppDimens.spacingLg),
                 AppTextField(
@@ -294,11 +272,15 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   spacing: AppDimens.spacingSm,
                   children: EmotionBefore.values.map((e) {
                     return ChoiceChip(
-                      label: Text(e.label),
+                      label: Text(
+                        e.label,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: state.emotionBefore == e ? AppColors.accent : AppColors.textSecondary,
+                        ),
+                      ),
+                      checkmarkColor: AppColors.accent,
                       selected: state.emotionBefore == e,
-                      onSelected: (_) => context.read<TradeFormBloc>().add(
-                            TradeFormFieldChanged(emotionBefore: e),
-                          ),
+                      onSelected: (_) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(emotionBefore: e)),
                     );
                   }).toList(),
                 ),
@@ -309,11 +291,15 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   spacing: AppDimens.spacingSm,
                   children: EmotionAfter.values.map((e) {
                     return ChoiceChip(
-                      label: Text(e.label),
+                      label: Text(
+                        e.label,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: state.emotionAfter == e ? AppColors.accent : AppColors.textSecondary,
+                        ),
+                      ),
+                      checkmarkColor: AppColors.accent,
                       selected: state.emotionAfter == e,
-                      onSelected: (_) => context.read<TradeFormBloc>().add(
-                            TradeFormFieldChanged(emotionAfter: e),
-                          ),
+                      onSelected: (_) => context.read<TradeFormBloc>().add(TradeFormFieldChanged(emotionAfter: e)),
                     );
                   }).toList(),
                 ),
@@ -323,13 +309,15 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 Wrap(
                   spacing: AppDimens.spacingSm,
                   children: [
-                    ...state.tags.map((tag) => Chip(
-                          label: Text(tag),
-                          onDeleted: () {
-                            final tags = [...state.tags]..remove(tag);
-                            context.read<TradeFormBloc>().add(TradeFormFieldChanged(tags: tags));
-                          },
-                        )),
+                    ...state.tags.map(
+                      (tag) => Chip(
+                        label: Text(tag),
+                        onDeleted: () {
+                          final tags = [...state.tags]..remove(tag);
+                          context.read<TradeFormBloc>().add(TradeFormFieldChanged(tags: tags));
+                        },
+                      ),
+                    ),
                     ActionChip(
                       label: const Text(AppStrings.addTag),
                       onPressed: () async {
@@ -341,19 +329,14 @@ class _TradeFormPageState extends State<TradeFormPage> {
                               content: TextField(controller: _tagController),
                               actions: [
                                 TextButton(onPressed: () => Navigator.pop(ctx), child: const Text(AppStrings.cancel)),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx, _tagController.text),
-                                  child: const Text(AppStrings.save),
-                                ),
+                                TextButton(onPressed: () => Navigator.pop(ctx, _tagController.text), child: const Text(AppStrings.save)),
                               ],
                             );
                           },
                         );
                         if (tag != null && tag.isNotEmpty) {
                           if (!context.mounted) return;
-                          context.read<TradeFormBloc>().add(
-                                TradeFormFieldChanged(tags: [...state.tags, tag]),
-                              );
+                          context.read<TradeFormBloc>().add(TradeFormFieldChanged(tags: [...state.tags, tag]));
                         }
                       },
                     ),
@@ -366,14 +349,14 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   label: const Text(AppStrings.addScreenshot),
                 ),
                 if (state.screenshotPaths.isNotEmpty)
-                  Text('${state.screenshotPaths.length} screenshot(s) attached',
-                      style: AppTextStyles.bodySmall),
+                  Text('${state.screenshotPaths.length} screenshot(s) attached', style: AppTextStyles.bodySmall),
                 const SizedBox(height: AppDimens.spacingXl),
                 AppButton(
                   label: state.isClosed ? AppStrings.saveTrade : AppStrings.saveAsOpen,
                   isLoading: state.status == TradeFormStatus.saving,
                   onPressed: () => context.read<TradeFormBloc>().add(const TradeFormSaveRequested()),
                 ),
+                const SizedBox(height: AppDimens.spacingXl),
               ],
             ),
           );
