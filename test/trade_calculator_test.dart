@@ -15,6 +15,10 @@ void main() {
     test('rounds values to two decimals', () {
       expect(NumberFormatter.round(1.236), 1.24);
     });
+
+    test('preserves precision for input values when requested', () {
+      expect(NumberFormatter.formatInput(0.1234, preservePrecision: true), '0.1234');
+    });
   });
 
   group('CurrencyFormatter', () {

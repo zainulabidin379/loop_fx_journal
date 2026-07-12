@@ -8,8 +8,9 @@ abstract final class NumberFormatter {
     return value.toStringAsFixed(decimalPlaces);
   }
 
-  static String formatInput(double? value) {
+  static String formatInput(double? value, {bool preservePrecision = false}) {
     if (value == null) return '';
+    if (preservePrecision) return value.toString();
     return format(value);
   }
 

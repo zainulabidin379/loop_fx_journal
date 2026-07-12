@@ -51,10 +51,10 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         instrument: existing?.instrument ?? TradeInstrument.xauusd,
         customInstrument: existing?.customInstrument,
         direction: existing?.direction ?? TradeDirection.long,
-        entryPrice: NumberFormatter.formatInput(existing?.entryPrice),
-        exitPrice: NumberFormatter.formatInput(existing?.exitPrice),
-        stopLoss: NumberFormatter.formatInput(existing?.stopLoss),
-        takeProfit: NumberFormatter.formatInput(existing?.takeProfit),
+        entryPrice: NumberFormatter.formatInput(existing?.entryPrice, preservePrecision: true),
+        exitPrice: NumberFormatter.formatInput(existing?.exitPrice, preservePrecision: true),
+        stopLoss: NumberFormatter.formatInput(existing?.stopLoss, preservePrecision: true),
+        takeProfit: NumberFormatter.formatInput(existing?.takeProfit, preservePrecision: true),
         lotSize: NumberFormatter.formatInput(existing?.lotSize),
         entryDateTime: existing?.entryDateTime ?? DateTime.now(),
         exitDateTime: existing?.exitDateTime,
@@ -94,9 +94,6 @@ class TradeFormBloc extends Bloc<TradeFormEvent, TradeFormState> {
         ClosePriceSource.breakeven => nextBreakeven,
         ClosePriceSource.custom => nextExitPrice,
       };
-      if (nextExitPrice.isNotEmpty) {
-        nextExitPrice = NumberFormatter.formatString(nextExitPrice);
-      }
     }
 
     final next = state.copyWith(

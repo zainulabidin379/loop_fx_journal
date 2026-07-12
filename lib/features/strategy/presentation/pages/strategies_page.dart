@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/constants/app_dimens.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/di/injection_container.dart';
-import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../dashboard/domain/utils/dashboard_analytics.dart';
 import '../../../trade/domain/usecases/trade_usecases.dart';
@@ -86,7 +87,10 @@ class _StrategiesPageState extends State<StrategiesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.strategiesTitle)),
-      floatingActionButton: FloatingActionButton(onPressed: () => _showAddDialog(), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddDialog(),
+        child: HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
+      ),
       body: _strategies.isEmpty
           ? const EmptyState(title: AppStrings.noStrategies)
           : ListView.separated(
@@ -176,10 +180,11 @@ class _StrategyDetailPageState extends State<StrategyDetailPage> {
                 const SizedBox(height: AppDimens.spacingXl),
                 Text(AppStrings.strategyPerformance, style: AppTextStyles.headlineMedium),
                 const SizedBox(height: AppDimens.spacingLg),
-                Text('${AppStrings.winRate}: ${CurrencyFormatter.formatPercent(metrics.winRate)}',
-                    style: AppTextStyles.bodyLarge),
-                Text('${AppStrings.avgRiskReward}: ${CurrencyFormatter.formatRatio(metrics.avgRiskReward)}',
-                    style: AppTextStyles.bodyLarge),
+                Text('${AppStrings.winRate}: ${CurrencyFormatter.formatPercent(metrics.winRate)}', style: AppTextStyles.bodyLarge),
+                Text(
+                  '${AppStrings.avgRiskReward}: ${CurrencyFormatter.formatRatio(metrics.avgRiskReward)}',
+                  style: AppTextStyles.bodyLarge,
+                ),
                 Text('${AppStrings.totalTrades}: ${metrics.totalTrades}', style: AppTextStyles.bodyLarge),
               ],
             ),
