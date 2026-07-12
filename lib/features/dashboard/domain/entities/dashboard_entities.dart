@@ -107,6 +107,21 @@ class StreakInfo extends Equatable {
   List<Object?> get props => [currentStreak, isWinStreak, longestWinStreak, longestLossStreak];
 }
 
+class DailyTradeSummary extends Equatable {
+  const DailyTradeSummary({
+    required this.date,
+    required this.pnl,
+    required this.tradeCount,
+  });
+
+  final DateTime date;
+  final double pnl;
+  final int tradeCount;
+
+  @override
+  List<Object?> get props => [date, pnl, tradeCount];
+}
+
 class RecapSummary extends Equatable {
   const RecapSummary({
     required this.periodLabel,

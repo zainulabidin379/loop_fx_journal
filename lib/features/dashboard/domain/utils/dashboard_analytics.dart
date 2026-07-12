@@ -223,6 +223,68 @@ abstract final class DashboardAnalytics {
     return _recap(allTrades, filter, 'This Month');
   }
 
+  static DateTime _dateOnly(DateTime date) => DateTime(date.year, date.month, date.day);
+
+  static DateTime? _tradeDate(Trade trade) {
+    if (trade.isOpen) return null;
+    final d = trade.exitDateTime ?? trade.entryDateTime;
+    return _dateOnly(d);
+  }
+
+  static Map<DateTime, DailyTradeSummary> dailySummariesForMonth(
+    List<Trade> allTrades,
+    int year,
+    int month,
+  ) {
+    final monthStart = DateTime(year, month, 1);
+    final monthEnd = DateTime(year, month + 1, 0, 23, 59, 59);
+    final trades = filterTrades(
+      allTrades,
+      DashboardFilter(
+        dateRange: DateRangeFilter.custom,
+        customStart: monthStart,
+        customEnd: monthEnd,
+      ),
+    );
+
+    final map = <DateTime, DailyTradeSummary>{};
+    for (final trade in trades) {
+      final key = _dateOnly(trade.exitDateTime ?? trade.entryDateTime);
+      final existing = map[key];
+      map[key] = DailyTradeSummary(
+        date: key,
+        pnl: (existing?.pnl ?? 0) + (trade.pnl ?? 0),
+        tradeCount: (existing?.tradeCount ?? 0) + 1,
+      );
+    }
+    return map;
+  }
+
+  static List<Trade> tradesForDay(List<Trade> allTrades, DateTime date) {
+    final day = _dateOnly(date);
+    return allTrades.where((trade) {
+      if (trade.isOpen) return false;
+      return _tradeDate(trade) == day;
+    }).toList()
+      ..sort((a, b) {
+        final aDate = a.exitDateTime ?? a.entryDateTime;
+        final bDate = b.exitDateTime ?? b.entryDateTime;
+        return aDate.compareTo(bDate);
+      });
+  }
+
+  static DateTime? earliestTradeMonth(List<Trade> allTrades) {
+    final closed = allTrades.where((t) => !t.isOpen).toList();
+    if (closed.isEmpty) return null;
+    closed.sort((a, b) {
+      final aDate = a.exitDateTime ?? a.entryDateTime;
+      final bDate = b.exitDateTime ?? b.entryDateTime;
+      return aDate.compareTo(bDate);
+    });
+    final earliest = closed.first.exitDateTime ?? closed.first.entryDateTime;
+    return DateTime(earliest.year, earliest.month);
+  }
+
   static RecapSummary _recap(List<Trade> allTrades, DashboardFilter filter, String label) {
     final trades = filterTrades(allTrades, filter);
     final metrics = computeMetrics(trades);

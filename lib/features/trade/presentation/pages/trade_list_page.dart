@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
@@ -30,7 +31,10 @@ class _TradeListPageState extends State<TradeListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.tradesTitle)),
-      floatingActionButton: FloatingActionButton(onPressed: () => context.push('/trades/add'), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/trades/add'),
+        child: HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
+      ),
       body: BlocBuilder<TradeListBloc, TradeListState>(
         builder: (context, state) {
           if (state.status == TradeListStatus.loading) {

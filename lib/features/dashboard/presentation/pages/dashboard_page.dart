@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -17,6 +18,7 @@ import '../../../trade/domain/entities/trade.dart';
 import '../../domain/entities/dashboard_entities.dart';
 import '../bloc/dashboard_bloc.dart';
 import '../widgets/dashboard_charts.dart';
+import '../widgets/performance_calendar.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -62,11 +64,14 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             Image.asset(AppAssets.logo, width: AppDimens.iconLg, height: AppDimens.iconLg),
             const SizedBox(width: AppDimens.spacingMd),
-            Text(AppStrings.appName, style: AppTextStyles.displayLarge.copyWith(color: AppColors.accent)),
+            Text(AppStrings.appName, style: AppTextStyles.headlineLarge.copyWith(color: AppColors.accent)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () => context.push('/trades/add'), child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/trades/add'),
+        child: HugeIcon(icon: HugeIcons.strokeRoundedAdd01),
+      ),
       body: BlocBuilder<DashboardBloc, DashboardState>(
         builder: (context, state) {
           if (state.status == DashboardStatus.loading) {
@@ -175,6 +180,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   if (state.weeklyRecap != null && state.monthlyRecap != null) const SizedBox(height: AppDimens.spacingMd),
                   if (state.monthlyRecap != null) _RecapCard(summary: state.monthlyRecap!),
                 ],
+                const SizedBox(height: AppDimens.spacingLg),
+                PerformanceCalendar(trades: state.allTrades),
               ],
             ),
           );

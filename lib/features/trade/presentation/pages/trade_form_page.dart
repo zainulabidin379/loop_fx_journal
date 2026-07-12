@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -186,7 +187,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(AppStrings.entryDate, style: AppTextStyles.labelMedium),
                   subtitle: Text(state.entryDateTime != null ? DateFormatter.formatDateTime(state.entryDateTime!) : '—'),
-                  trailing: const Icon(Icons.calendar_today),
+                  trailing: HugeIcon(icon: HugeIcons.strokeRoundedCalendar03),
                   onTap: () async {
                     final date = await showDatePicker(
                       context: context,
@@ -211,6 +212,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 DropdownButtonFormField<String?>(
                   initialValue: state.strategyId,
                   decoration: const InputDecoration(labelText: AppStrings.strategy),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01),
                   items: [
                     const DropdownMenuItem(value: null, child: Text(AppStrings.noStrategy)),
                     ...state.strategies.map((s) => DropdownMenuItem(value: s.id, child: Text(s.name))),
@@ -345,7 +347,7 @@ class _TradeFormPageState extends State<TradeFormPage> {
                 const SizedBox(height: AppDimens.spacingLg),
                 OutlinedButton.icon(
                   onPressed: () => _pickScreenshot(state),
-                  icon: const Icon(Icons.image_outlined),
+                  icon: HugeIcon(icon: HugeIcons.strokeRoundedImage01),
                   label: const Text(AppStrings.addScreenshot),
                 ),
                 if (state.screenshotPaths.isNotEmpty)

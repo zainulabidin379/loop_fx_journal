@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_dimens.dart';
@@ -55,9 +56,12 @@ class _TradeDetailPageState extends State<TradeDetailPage> {
       appBar: AppBar(
         title: const Text(AppStrings.tradeDetail),
         actions: [
-          IconButton(icon: const Icon(Icons.edit_outlined), onPressed: _openEdit),
           IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedEdit03),
+            onPressed: _openEdit,
+          ),
+          IconButton(
+            icon: HugeIcon(icon: HugeIcons.strokeRoundedDelete01),
             onPressed: () async {
               final confirm = await showDialog<bool>(
                 context: context,

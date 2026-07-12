@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../constants/app_colors.dart';
 import '../constants/app_dimens.dart';
 import '../constants/app_text_styles.dart';
@@ -55,9 +56,7 @@ abstract final class AppTheme {
         selectedColor: AppColors.chipSelected,
         labelStyle: AppTextStyles.bodySmall,
         side: const BorderSide(color: AppColors.border),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusSm),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radiusSm)),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.accent,
@@ -73,15 +72,11 @@ abstract final class AppTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.surfaceElevated,
         contentTextStyle: AppTextStyles.bodyMedium,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusSm),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radiusSm)),
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppDimens.radiusLg)),
         titleTextStyle: AppTextStyles.headlineMedium,
         contentTextStyle: AppTextStyles.bodyMedium,
       ),

@@ -42,6 +42,10 @@ abstract final class AppStrings {
   static const String noTradesYet = 'No trades yet';
   static const String noTradesSubtitle = 'Log your first trade to start tracking performance';
   static const String viewRecap = 'View Recap';
+  static const String performanceCalendar = 'Trading Calendar';
+  static const String calendarTrades = 'trades';
+  static const String calendarNoTrades = 'No trades on this day';
+  static const List<String> calendarWeekdays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   // Trades
   static const String tradesTitle = 'Trades';
