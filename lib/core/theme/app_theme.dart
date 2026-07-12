@@ -13,9 +13,30 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme.dark(
         surface: AppColors.surface,
-        primary: AppColors.accent,
-        error: AppColors.error,
         onSurface: AppColors.textPrimary,
+        primary: AppColors.accent,
+        onPrimary: AppColors.background,
+        secondary: AppColors.accent,
+        onSecondary: AppColors.background,
+        secondaryContainer: AppColors.chipSelected,
+        onSecondaryContainer: AppColors.background,
+        tertiary: AppColors.accent,
+        onTertiary: AppColors.background,
+        error: AppColors.error,
+        onError: AppColors.background,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(color: AppColors.accent, circularTrackColor: AppColors.chipSelected),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return AppColors.accent;
+          return AppColors.textMuted;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.accent.withValues(alpha: 0.5);
+          }
+          return AppColors.border;
+        }),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.background,
