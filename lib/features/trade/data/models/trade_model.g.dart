@@ -23,7 +23,7 @@ class TradeModelAdapter extends TypeAdapter<TradeModel> {
       directionIndex: fields[3] as int,
       entryPrice: fields[4] as double,
       exitPrice: fields[5] as double?,
-      stopLoss: fields[6] as double,
+      stopLoss: fields[6] as double?,
       takeProfit: fields[7] as double?,
       lotSize: fields[8] as double,
       entryDateTime: fields[9] as DateTime,

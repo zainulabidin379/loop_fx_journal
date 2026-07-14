@@ -92,7 +92,7 @@ class _DashboardPageState extends State<DashboardPage> {
               context.read<DashboardBloc>().add(const DashboardLoadRequested());
             },
             child: ListView(
-              padding: const EdgeInsets.all(AppDimens.spacingLg),
+              padding: const EdgeInsets.all(AppDimens.spacingMd),
               children: [
                 FilterChipBar(
                   options: const [AppStrings.filter7d, AppStrings.filter30d, AppStrings.filter90d, AppStrings.filterAll],

@@ -13,11 +13,7 @@ import '../../domain/utils/dashboard_analytics.dart';
 import 'day_trades_sheet.dart';
 
 class _CalendarCell {
-  const _CalendarCell({
-    required this.date,
-    required this.isCurrentMonth,
-    this.summary,
-  });
+  const _CalendarCell({required this.date, required this.isCurrentMonth, this.summary});
 
   final DateTime date;
   final bool isCurrentMonth;
@@ -71,13 +67,7 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
 
     for (var day = 1; day <= daysInMonth; day++) {
       final date = DateTime(year, month, day);
-      cells.add(
-        _CalendarCell(
-          date: date,
-          isCurrentMonth: true,
-          summary: summaries[date],
-        ),
-      );
+      cells.add(_CalendarCell(date: date, isCurrentMonth: true, summary: summaries[date]));
     }
 
     final trailingDays = (7 - (cells.length % 7)) % 7;
@@ -103,28 +93,22 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final earliest = DashboardAnalytics.earliestTradeMonth(widget.trades);
-    final canGoPrev = earliest != null &&
-        (_visibleMonth.year > earliest.year ||
-            (_visibleMonth.year == earliest.year && _visibleMonth.month > earliest.month));
-    final canGoNext = _visibleMonth.year < now.year ||
-        (_visibleMonth.year == now.year && _visibleMonth.month < now.month);
+    final canGoPrev =
+        earliest != null &&
+        (_visibleMonth.year > earliest.year || (_visibleMonth.year == earliest.year && _visibleMonth.month > earliest.month));
+    final canGoNext = _visibleMonth.year < now.year || (_visibleMonth.year == now.year && _visibleMonth.month < now.month);
 
-    final summaries = DashboardAnalytics.dailySummariesForMonth(
-      widget.trades,
-      _visibleMonth.year,
-      _visibleMonth.month,
-    );
+    final summaries = DashboardAnalytics.dailySummariesForMonth(widget.trades, _visibleMonth.year, _visibleMonth.month);
     final cells = _buildCells(summaries);
 
     return AppCard(
+      padding: EdgeInsets.all(AppDimens.spacingSm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Expanded(
-                child: Text(AppStrings.performanceCalendar, style: AppTextStyles.titleMedium),
-              ),
+              Expanded(child: Text(AppStrings.performanceCalendar, style: AppTextStyles.titleMedium)),
               IconButton(
                 onPressed: canGoPrev ? _goToPreviousMonth : null,
                 icon: const Icon(Icons.chevron_left, color: AppColors.textSecondary),
@@ -132,10 +116,7 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
-              Text(
-                DateFormatter.formatMonthYear(_visibleMonth),
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
+              Text(DateFormatter.formatMonthYear(_visibleMonth), style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
               IconButton(
                 onPressed: canGoNext ? _goToNextMonth : null,
                 icon: const Icon(Icons.chevron_right, color: AppColors.textSecondary),
@@ -150,9 +131,7 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
             children: AppStrings.calendarWeekdays
                 .map(
                   (day) => Expanded(
-                    child: Center(
-                      child: Text(day, style: AppTextStyles.labelMedium),
-                    ),
+                    child: Center(child: Text(day, style: AppTextStyles.labelMedium)),
                   ),
                 )
                 .toList(),
@@ -170,11 +149,7 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
             itemCount: cells.length,
             itemBuilder: (context, index) {
               final cell = cells[index];
-              return _DayCell(
-                cell: cell,
-                isToday: cell.date == today,
-                onTap: () => _onDayTap(cell),
-              );
+              return _DayCell(cell: cell, isToday: cell.date == today, onTap: () => _onDayTap(cell));
             },
           ),
         ],
@@ -184,11 +159,7 @@ class _PerformanceCalendarState extends State<PerformanceCalendar> {
 }
 
 class _DayCell extends StatelessWidget {
-  const _DayCell({
-    required this.cell,
-    required this.isToday,
-    required this.onTap,
-  });
+  const _DayCell({required this.cell, required this.isToday, required this.onTap});
 
   final _CalendarCell cell;
   final bool isToday;
@@ -204,14 +175,6 @@ class _DayCell extends StatelessWidget {
     return AppColors.breakeven;
   }
 
-  Color? _dotColor() {
-    final summary = cell.summary;
-    if (summary == null || summary.tradeCount == 0) return null;
-    if (summary.pnl > 0) return AppColors.profit;
-    if (summary.pnl < 0) return AppColors.loss;
-    return AppColors.breakeven;
-  }
-
   Color _pnlColor(double pnl) {
     if (pnl > 0) return AppColors.profit;
     if (pnl < 0) return AppColors.loss;
@@ -222,7 +185,6 @@ class _DayCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final summary = cell.summary;
     final hasTrades = summary != null && summary.tradeCount > 0;
-    final dotColor = _dotColor();
     final borderColor = _borderColor()!;
 
     return Material(
@@ -240,24 +202,7 @@ class _DayCell extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _DateBadge(
-                    day: cell.date.day,
-                    isToday: isToday && cell.isCurrentMonth,
-                    isCurrentMonth: cell.isCurrentMonth,
-                  ),
-                  if (dotColor != null && cell.isCurrentMonth)
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
-                    )
-                  else
-                    const SizedBox(width: 6),
-                ],
-              ),
+              _DateBadge(day: cell.date.day, isToday: isToday && cell.isCurrentMonth, isCurrentMonth: cell.isCurrentMonth),
               if (hasTrades && cell.isCurrentMonth) ...[
                 const Spacer(),
                 FittedBox(
@@ -265,17 +210,8 @@ class _DayCell extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     CurrencyFormatter.format(summary.pnl),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: _pnlColor(summary.pnl),
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.bodySmall.copyWith(color: _pnlColor(summary.pnl), fontWeight: FontWeight.w600),
                   ),
-                ),
-                Text(
-                  '${summary.tradeCount} ${AppStrings.calendarTrades}',
-                  style: AppTextStyles.labelMedium.copyWith(fontSize: 10),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],
@@ -287,11 +223,7 @@ class _DayCell extends StatelessWidget {
 }
 
 class _DateBadge extends StatelessWidget {
-  const _DateBadge({
-    required this.day,
-    required this.isToday,
-    required this.isCurrentMonth,
-  });
+  const _DateBadge({required this.day, required this.isToday, required this.isCurrentMonth});
 
   final int day;
   final bool isToday;
@@ -306,20 +238,13 @@ class _DateBadge extends StatelessWidget {
 
     if (isToday) {
       return Container(
-        width: 22,
-        height: 22,
+        width: 20,
+        height: 20,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          color: AppColors.accent,
-          shape: BoxShape.circle,
-        ),
-        child: Text(
-          '$day',
-          style: textStyle.copyWith(color: AppColors.background, fontSize: 11),
-        ),
+        decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+        child: Text('$day', style: textStyle.copyWith(color: AppColors.background, fontSize: 11)),
       );
     }
-
-    return Text('$day', style: textStyle.copyWith(fontSize: 11));
+    return Text('$day', style: textStyle.copyWith(fontSize: 12));
   }
 }
